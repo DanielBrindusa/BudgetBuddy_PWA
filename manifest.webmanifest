@@ -1,0 +1,16 @@
+{
+  "name": "BudgetBuddy",
+  "short_name": "BudgetBuddy",
+  "start_url": "budgetbuddy.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0c1117",
+  "theme_color": "#10141b",
+  "description": "A modern, offline budget tracker with file-or-browser storage, currency selector, chart and passcode lock.",
+  "icons": [
+    /* Optional — add PNGs later:
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+    */
+  ]
+}
