@@ -45,34 +45,62 @@
       -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
     }
 
-    /* ======= App Shell ======= */
+    /* ======= Buttons, inputs ======= */
+    .btn{
+      appearance:none; border:1px solid var(--outline); background:linear-gradient(180deg, var(--surface-2), var(--surface));
+      color:var(--text); padding:10px 14px; border-radius:999px; cursor:pointer;
+      transition: transform var(--speed), box-shadow var(--speed), background var(--speed);
+      box-shadow: 0 2px 10px rgba(0,0,0,.2); white-space:nowrap;
+    }
+    .btn:hover{ transform: translateY(-1px) }
+    .btn:active{ transform: translateY(0) scale(.98) }
+    .btn.primary{ border-color: color-mix(in oklab, var(--primary) 50%, var(--outline)); background: linear-gradient(180deg, color-mix(in oklab, var(--primary) 30%, transparent), var(--surface)); }
+    .btn.danger{ border-color: color-mix(in oklab, var(--warn) 40%, var(--outline)); color: var(--warn); }
+    .btn.sm{ padding:8px 12px; font-size:.95rem }      /* compact */
+    input[type="text"], input[type="number"], input[type="date"], input[type="month"], select, textarea{
+      width:100%; padding:11px 12px; border-radius: var(--radius-sm);
+      border:1px solid var(--outline); background: var(--surface); color:var(--text);
+      outline:none; transition: border-color var(--speed), background var(--speed);
+    }
+    input:focus, select:focus, textarea:focus{
+      border-color: var(--focus);
+      box-shadow: 0 0 0 4px color-mix(in oklab, var(--focus) 26%, transparent);
+      background: var(--surface-2);
+    }
+
+    /* ======= Header: mobile-first two-row layout ======= */
     header{
       position: sticky; top:0; z-index: 10; backdrop-filter: blur(var(--blur)) saturate(1.2);
       background: linear-gradient(180deg, rgba(10,14,20,.75), rgba(10,14,20,.35), transparent);
       border-bottom: 1px solid var(--outline);
     }
     .wrap{ max-width:1100px; margin:0 auto; padding:14px 16px; }
-    .brand{ display:flex; align-items:center; gap:10px; margin:0 0 12px 0; }
+    .brand-row{
+      display:grid; grid-template-columns:auto 1fr auto auto; gap:10px; align-items:center;
+    }
     .logo{ width:34px; height:34px; border-radius:8px; background: radial-gradient(100% 100% at 30% 20%, #76f0c0, #2f7d62); box-shadow: 0 6px 16px rgba(93,211,161,.35), inset 0 0 20px rgba(255,255,255,.2); }
-    .brand h1{ font-size:1.15rem; letter-spacing:.2px; margin:0 }
-    .chip{ display:inline-flex; align-items:center; gap:8px; border:1px solid var(--outline); background:var(--surface); padding:9px 12px; border-radius:999px; color:var(--muted); }
-    .btn{
-      appearance:none; border:1px solid var(--outline); background:linear-gradient(180deg, var(--surface-2), var(--surface));
-      color:var(--text); padding:10px 14px; border-radius:999px; cursor:pointer;
-      transition: transform var(--speed), box-shadow var(--speed), background var(--speed);
-      box-shadow: 0 2px 10px rgba(0,0,0,.2);
+    h1{ font-size:1.1rem; margin:0 }
+    .chip{
+      display:inline-flex; align-items:center; gap:8px;
+      border:1px solid var(--outline); background:var(--surface);
+      padding:8px 10px; border-radius:999px; color:var(--muted); white-space:nowrap;
     }
-    .btn:hover{ transform: translateY(-1px) }
-    .btn:active{ transform: translateY(0) scale(.98) }
-    .btn.primary{ border-color: color-mix(in oklab, var(--primary) 50%, var(--outline)); background: linear-gradient(180deg, color-mix(in oklab, var(--primary) 30%, transparent), var(--surface)); }
-    .btn.danger{ border-color: color-mix(in oklab, var(--warn) 40%, var(--outline)); color: var(--warn); }
-    .icon-btn{ padding:10px 12px }
-    input[type="text"], input[type="number"], input[type="date"], input[type="month"], select, textarea{
-      width:100%; padding:11px 12px; border-radius: var(--radius-sm);
-      border:1px solid var(--outline); background: var(--surface); color:var(--text);
-      outline:none; transition: border-color var(--speed), background var(--speed);
+
+    /* toolbar row: horizontal scroll on phones */
+    .toolbar{
+      display:flex; gap:10px; margin-top:10px; overflow-x:auto; padding-bottom:6px;
+      -webkit-overflow-scrolling: touch; scrollbar-width:thin;
     }
-    input:focus, select:focus, textarea:focus{ border-color: var(--focus); box-shadow: 0 0 0 4px color-mix(in oklab, var(--focus) 26%, transparent); background: var(--surface-2); }
+    .toolbar::-webkit-scrollbar{ height:6px }
+    .toolbar::-webkit-scrollbar-thumb{ background:var(--outline); border-radius:8px }
+
+    /* Filters: grid on phones, flex on wide */
+    .filters{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:8px }
+    @media (min-width:900px){
+      .filters{ display:flex; flex-wrap:wrap; align-items:end }
+    }
+
+    /* ======= Cards & grids ======= */
     .grid{ display:grid; gap:16px }
     .grid-2{ grid-template-columns: 1fr }
     @media (min-width:980px){ .grid-2{ grid-template-columns: 2fr 1fr } }
@@ -87,42 +115,40 @@
     .row{ display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end }
     label{ font-size:.9rem; color:var(--muted); display:block; margin:0 0 6px 4px }
 
-    /* ======= Totals ======= */
+    /* Totals: responsive columns */
     .totals{ display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; margin-top:10px }
-    .pill{ border:1px solid var(--outline); border-radius: var(--radius-sm); background: linear-gradient(180deg, var(--surface-2), var(--surface)); padding:14px 16px; text-align:center; position:relative; overflow:hidden; }
+    @media (max-width:560px){ .totals{ grid-template-columns: repeat(2, 1fr) } }
+    @media (max-width:380px){ .totals{ grid-template-columns: 1fr } }
+    .pill{ border:1px solid var(--outline); border-radius: var(--radius-sm); background: linear-gradient(180deg, var(--surface-2), var(--surface)); padding:14px 16px; text-align:center }
     .pill .label{ display:block; color:var(--muted); font-size:.9rem }
-    .pill .val{ display:block; font-weight:700; font-size:1.25rem; letter-spacing:.2px }
+    .pill .val{ display:block; font-weight:700; font-size:1.2rem; letter-spacing:.2px }
     .income .val{ color: var(--primary) }
     .expense .val{ color: var(--warn) }
 
-    /* ======= Tables ======= */
+    /* Tables */
     .table-wrap{ overflow:auto; border-radius:0 0 var(--radius) var(--radius) }
-    table{ width:100%; border-collapse:collapse; }
+    table{ width:100%; border-collapse:collapse; min-width:720px } /* allow horizontal scroll on small screens */
     th, td{ border-bottom:1px solid var(--outline); padding:12px; text-align:left; vertical-align:top }
-    th{ color:var(--muted); font-weight:600; font-size:.9rem; backdrop-filter: blur(calc(var(--blur)*.4)); position:sticky; top:0; background: color-mix(in oklab, var(--surface) 75%, transparent); }
-    tr{ transition: background var(--speed) }
-    tr:hover td{ background: color-mix(in oklab, var(--surface) 50%, transparent) }
+    th{ color:var(--muted); font-weight:600; font-size:.9rem; position:sticky; top:0; backdrop-filter: blur(calc(var(--blur)*.4)); background: color-mix(in oklab, var(--surface) 75%, transparent) }
     .right{ text-align:right }
     .mono{ font-variant-numeric: tabular-nums }
-    .cat{ padding:2px 10px; border-radius:999px; background: color-mix(in oklab, var(--surface) 65%, transparent); }
+    .cat{ padding:2px 10px; border-radius:999px; background: color-mix(in oklab, var(--surface) 65%, transparent) }
 
-    /* ======= Dialogs ======= */
+    /* Dialogs */
     dialog{
       border:none; border-radius: var(--radius); background: color-mix(in oklab, var(--surface) 90%, transparent);
       color:var(--text); box-shadow: var(--shadow); border:1px solid var(--outline); width:min(620px, calc(100% - 32px));
-      animation: pop .18s ease-out forwards; transform-origin: center;
-      backdrop-filter: blur(var(--blur));
+      animation: pop .18s ease-out forwards; transform-origin: center; backdrop-filter: blur(var(--blur));
     }
     dialog::backdrop{ background: rgba(0,0,0,.35); backdrop-filter: blur(2px) }
     @keyframes pop{ from{ transform: scale(.96); opacity:.0 } to{ transform: scale(1); opacity:1 } }
     .dlg-head{ padding:14px 16px; border-bottom:1px solid var(--outline); font-weight:700 }
     .dlg-body{ padding:16px }
-    .dlg-foot{ padding:12px 16px; border-top:1px solid var(--outline); display:flex; gap:8px; justify-content:flex-end }
-    /* NEW: note under buttons in storage dialog */
+    .dlg-foot{ padding:12px 16px; border-top:1px solid var(--outline); display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap }
     .dlg-postfoot{ padding:8px 16px 16px; text-align:center }
     .dlg-postfoot .hint{ display:inline-block; margin-top:6px }
 
-    /* ======= Toasts & Chart ======= */
+    /* Toasts & chart */
     .toasts{ position: fixed; right: 18px; bottom: 18px; display:flex; flex-direction:column; gap:10px; z-index: 9999; }
     .toast{ border:1px solid var(--outline); background: color-mix(in oklab, var(--surface) 96%, transparent); padding:10px 12px; border-radius: 10px; box-shadow: var(--shadow); transform: translateY(8px); opacity:0; animation: slideIn .22s ease-out forwards; }
     @keyframes slideIn { to { transform: translateY(0); opacity:1 } }
@@ -131,32 +157,40 @@
     .chart-wrap{ padding:14px 16px 6px; }
     canvas{ width:100%; height:220px; display:block }
 
-    /* ======= Small bits ======= */
-    .flex-end{ display:flex; justify-content:flex-end; gap:8px; flex-wrap:wrap }
-    .row-center{ display:flex; gap:10px; align-items:center; flex-wrap:wrap }
-    .hint{ color:var(--muted); font-size:.9rem }
-    .sr-only{ position:absolute; left:-10000px; top:auto; width:1px; height:1px; overflow:hidden }
-    footer{ color:var(--muted); padding:0 16px 26px; margin-top:16px } /* a touch more space */
+    /* Footer */
+    footer{ color:var(--muted); padding:0 16px 26px; margin-top:16px }
   </style>
 </head>
 <body>
   <header>
     <div class="wrap">
-      <div class="brand">
+      <!-- Row 1 -->
+      <div class="brand-row">
         <div class="logo" aria-hidden="true"></div>
         <h1>BudgetBuddy</h1>
         <span id="storageBadge" class="chip" title="Where your data is saved">Storage: …</span>
-        <button id="changeStorage" class="btn icon-btn" title="Change storage">Change</button>
-        <button id="openSettings" class="btn icon-btn" title="Currency & Passcode">Settings</button>
-        <div style="margin-left:auto" class="flex-end">
-          <button id="exportCsv" class="btn">Export CSV</button>
-          <button id="exportJson" class="btn">Export JSON</button>
-          <label class="btn" for="importFile" title="Import CSV or JSON">Import…</label>
-          <input id="importFile" type="file" accept=".csv,.json,text/csv,application/json" class="sr-only" />
-          <button id="clearAll" class="btn danger">Reset</button>
+        <div style="display:flex; gap:8px">
+          <button id="changeStorage" class="btn sm" title="Change storage">Change</button>
+          <button id="openSettings" class="btn sm" title="Currency & Passcode">Settings</button>
         </div>
       </div>
 
+      <!-- Row 2: scrollable toolbar -->
+      <div class="toolbar" aria-label="Actions">
+        <button id="exportCsv" class="btn sm">Export CSV</button>
+        <button id="exportJson" class="btn sm">Export JSON</button>
+        <label class="btn sm" for="importFile" title="Import CSV or JSON">Import…</label>
+        <input id="importFile" type="file" accept=".csv,.json,text/csv,application/json" class="sr-only" />
+        <button id="clearAll" class="btn sm danger">Reset</button>
+
+        <!-- push controls to the right if space allows -->
+        <div style="flex:1"></div>
+
+        <span class="chip">Currency: <strong id="currLabel" style="margin-left:6px">USD</strong></span>
+        <button id="lockNow" class="btn sm">Lock now</button>
+      </div>
+
+      <!-- Filters -->
       <div class="filters">
         <div>
           <label for="month">Month</label>
@@ -171,12 +205,9 @@
           <input id="categoryFilter" type="text" list="cats" placeholder="All" />
           <datalist id="cats"></datalist>
         </div>
-        <div class="row-center" style="margin-left:auto">
-          <span class="chip">Currency: <strong id="currLabel" style="margin-left:6px">USD</strong></span>
-          <button id="lockNow" class="btn">Lock now</button>
-        </div>
       </div>
 
+      <!-- Totals -->
       <div class="totals" role="status" aria-live="polite">
         <div class="pill income"><span class="label">Income</span><span id="tIncome" class="val mono">0.00</span></div>
         <div class="pill expense"><span class="label">Expense</span><span id="tExpense" class="val mono">0.00</span></div>
@@ -231,7 +262,7 @@
           <thead>
             <tr><th>Date</th><th>Type</th><th>Category</th><th class="right">Amount</th><th>Note</th><th class="right nowrap">Actions</th></tr>
           </thead>
-          <tbody id="txTbody"></tbody>
+        <tbody id="txTbody"></tbody>
         </table>
       </div>
     </section>
@@ -320,7 +351,6 @@
       <button class="btn" id="pickBrowser">Use Browser Storage</button>
       <button class="btn primary" id="pickFile">Choose a Data File…</button>
     </div>
-    <!-- NEW: message moved BELOW the buttons so it never overlaps -->
     <div class="dlg-postfoot">
       <span class="hint">No servers. Your data stays on your device (browser storage or file you choose). ✨</span>
     </div>
@@ -407,157 +437,594 @@
     };
     const todayISO = () => new Date().toISOString().slice(0,10);
     const toISO = d => (typeof d === "string" ? d : new Date(d).toISOString().slice(0,10));
-    const monthBounds = (yyyyMm) => { const [y,m] = (yyyyMm || todayISO().slice(0,7)).split("-").map(Number); const start = new Date(Date.UTC(y, m-1, 1)); const end = new Date(Date.UTC(y, m, 0)); return { start: start.toISOString().slice(0,10), end: end.toISOString().slice(0,10) }; };
+    const monthBounds = (yyyyMm) => {
+      const [y,m] = (yyyyMm || todayISO().slice(0,7)).split("-").map(Number);
+      const start = new Date(Date.UTC(y, m-1, 1));
+      const end = new Date(Date.UTC(y, m, 0));
+      return { start: start.toISOString().slice(0,10), end: end.toISOString().slice(0,10) };
+    };
     const escapeHtml = s => String(s).replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m]));
     const sleep = ms => new Promise(r => setTimeout(r, ms));
-    function toast(msg, kind='good'){ const host=$("#toasts"); const t=document.createElement("div"); t.className=`toast ${kind}`; t.textContent=msg; host.appendChild(t); setTimeout(()=>{t.style.opacity=.9},10); setTimeout(()=>{t.style.opacity=0; t.style.transform='translateY(8px)'; t.addEventListener('transitionend',()=>t.remove(),{once:true});},2800); }
-    async function sha256Hex(str){ const data=new TextEncoder().encode(str); const hash=await crypto.subtle.digest('SHA-256',data); return [...new Uint8Array(hash)].map(b=>b.toString(16).padStart(2,'0')).join(''); }
+    function toast(msg, kind='good'){
+      const host = $("#toasts");
+      const t = document.createElement("div"); t.className = `toast ${kind}`; t.textContent = msg;
+      host.appendChild(t);
+      setTimeout(()=> { t.style.opacity=.9 }, 10);
+      setTimeout(()=> { t.style.opacity=0; t.style.transform='translateY(8px)'; t.addEventListener('transitionend', ()=>t.remove(), {once:true}); }, 2800);
+    }
+    async function sha256Hex(str){
+      const data = new TextEncoder().encode(str);
+      const hash = await crypto.subtle.digest('SHA-256', data);
+      return [...new Uint8Array(hash)].map(b=>b.toString(16).padStart(2,'0')).join('');
+    }
 
     /* ===== Persistence ===== */
     const LS_KEY = "BudgetBuddy.v6";
     const MODE_KEY = "mode";
 
     const idb = {
-      db:null,
-      async open(){ await new Promise((res,rej)=>{ const req=indexedDB.open("BudgetBuddyStore",2); req.onupgradeneeded=()=>{const db=req.result; if(!db.objectStoreNames.contains('kv')) db.createObjectStore('kv');}; req.onsuccess=()=>{this.db=req.result; res()}; req.onerror=()=>rej(req.error); }); },
+      db: null,
+      async open(){
+        await new Promise((res, rej)=>{
+          const req = indexedDB.open("BudgetBuddyStore", 2);
+          req.onupgradeneeded = () => { const db = req.result; if(!db.objectStoreNames.contains('kv')) db.createObjectStore('kv'); };
+          req.onsuccess = () => { this.db = req.result; res() };
+          req.onerror = () => rej(req.error);
+        });
+      },
       get(key){ return new Promise((res,rej)=>{ const r=this.db.transaction('kv','readonly').objectStore('kv').get(key); r.onsuccess=()=>res(r.result??null); r.onerror=()=>rej(r.error); }); },
       set(key,val){ return new Promise((res,rej)=>{ const r=this.db.transaction('kv','readwrite').objectStore('kv').put(val,key); r.onsuccess=()=>res(); r.onerror=()=>rej(r.error); }); },
       del(key){ return new Promise((res,rej)=>{ const r=this.db.transaction('kv','readwrite').objectStore('kv').delete(key); r.onsuccess=()=>res(); r.onerror=()=>rej(r.error); }); },
     };
 
-    let storageMode='local';
-    let fileHandle=null;
+    let storageMode = 'local';
+    let fileHandle = null;
 
-    function lsLoad(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)||'null') }catch{ return null } }
+    function lsLoad(){ try { return JSON.parse(localStorage.getItem(LS_KEY) || 'null') } catch { return null } }
     function lsSave(obj){ localStorage.setItem(LS_KEY, JSON.stringify(obj)) }
-    async function verifyPermission(handle,mode='readwrite'){ const opt={mode}; if((await handle.queryPermission(opt))==='granted')return true; if((await handle.requestPermission(opt))==='granted')return true; return false; }
+    async function verifyPermission(handle, mode='readwrite'){
+      const opt = {mode};
+      if ((await handle.queryPermission(opt)) === 'granted') return true;
+      if ((await handle.requestPermission(opt)) === 'granted') return true;
+      return false;
+    }
 
     /* ===== State ===== */
-    const state={ transactions:[], budgets:{}, nextId:1, settings:{ currency:'USD', passcodeHash:null, autoLock:true } };
-    const currency=()=>state.settings.currency||'USD';
-    const money=n=>fmtNum(n,currency());
-    const maxId=()=>state.transactions.reduce((m,t)=>Math.max(m,Number(t.id)||0),0);
+    const state = { transactions: [], budgets: {}, nextId: 1, settings: { currency: 'USD', passcodeHash: null, autoLock: true } };
+    const currency = () => state.settings.currency || 'USD';
+    const money = n => fmtNum(n, currency());
+    const maxId = () => state.transactions.reduce((m,t)=>Math.max(m, Number(t.id)||0), 0);
 
-    function computeTotals(rows){ const inc=rows.filter(t=>t.type==='INCOME').reduce((s,t)=>s+t.amount,0); const exp=rows.filter(t=>t.type==='EXPENSE').reduce((s,t)=>s+t.amount,0); return {income:inc, expense:exp, balance:inc-exp}; }
-    function renderStorageBadge(){ $("#storageBadge").textContent = storageMode==='file' ? 'Storage: File' : 'Storage: Browser'; $("#currLabel").textContent=currency(); }
-    function refreshCategoryDatalist(){ const dl=$("#cats"); dl.innerHTML=""; const cats=[...new Set(state.transactions.map(t=>t.category).concat(Object.keys(state.budgets)))].filter(Boolean).sort(); for(const c of cats){ const o=document.createElement("option"); o.value=c; dl.appendChild(o);} }
-    function listFiltered(){ const yyyyMm=$("#month").value || todayISO().slice(0,7); const {start,end}=monthBounds(yyyyMm); const type=$("#typeFilter").value; const cat=($("#categoryFilter").value||"").trim().toLowerCase(); return state.transactions.filter(t=>t.date>=start && t.date<=end).filter(t=>!type || t.type===type).filter(t=>!cat || t.category.toLowerCase()===cat).sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id); }
+    function computeTotals(rows){ const income=rows.filter(t=>t.type==='INCOME').reduce((s,t)=>s+t.amount,0); const expense=rows.filter(t=>t.type==='EXPENSE').reduce((s,t)=>s+t.amount,0); return { income, expense, balance: income-expense }; }
+    function renderStorageBadge(){ $("#storageBadge").textContent = storageMode === 'file' ? 'Storage: File' : 'Storage: Browser'; $("#currLabel").textContent = currency(); }
+    function refreshCategoryDatalist(){ const dl=$("#cats"); dl.innerHTML=""; const cats=[...new Set(state.transactions.map(t=>t.category).concat(Object.keys(state.budgets)))].filter(Boolean).sort(); for(const c of cats){ const o=document.createElement("option"); o.value=c; dl.appendChild(o); } }
+
+    function listFiltered(){
+      const yyyyMm = $("#month").value || todayISO().slice(0,7);
+      const {start,end} = monthBounds(yyyyMm);
+      const type = $("#typeFilter").value;
+      const cat = ($("#categoryFilter").value||"").trim().toLowerCase();
+      return state.transactions
+        .filter(t => t.date >= start && t.date <= end)
+        .filter(t => !type || t.type===type)
+        .filter(t => !cat || t.category.toLowerCase()===cat)
+        .sort((a,b) => b.date.localeCompare(a.date) || b.id - a.id);
+    }
 
     function render(){
-      const rows=listFiltered();
-      const t=computeTotals(rows);
-      $("#tIncome").textContent=money(t.income);
-      $("#tExpense").textContent=money(t.expense);
-      $("#tBalance").textContent=money(t.balance);
+      const rows = listFiltered();
+      const t = computeTotals(rows);
+      $("#tIncome").textContent = money(t.income);
+      $("#tExpense").textContent = money(t.expense);
+      $("#tBalance").textContent = money(t.balance);
 
-      const tb=$("#txTbody"); tb.innerHTML="";
+      const tb = $("#txTbody"); tb.innerHTML = "";
       for(const r of rows){
-        const tr=document.createElement("tr");
-        tr.innerHTML=`<td class="mono">${r.date}</td><td>${r.type}</td><td><span class="cat">${escapeHtml(r.category)}</span></td><td class="right mono">${r.type==="INCOME"?"+":"-"}${money(r.amount)}</td><td>${escapeHtml(r.note||"")}</td><td class="right"><button class="btn" data-edit="${r.id}">Edit</button> <button class="btn danger" data-del="${r.id}">Delete</button></td>`;
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td class="mono">${r.date}</td>
+          <td>${r.type}</td>
+          <td><span class="cat">${escapeHtml(r.category)}</span></td>
+          <td class="right mono">${r.type==="INCOME" ? "+" : "-"}${money(r.amount)}</td>
+          <td>${escapeHtml(r.note||"")}</td>
+          <td class="right">
+            <button class="btn sm" data-edit="${r.id}">Edit</button>
+            <button class="btn sm danger" data-del="${r.id}">Delete</button>
+          </td>`;
         tb.appendChild(tr);
       }
 
-      const budTb=$("#budTbody"); budTb.innerHTML="";
-      const cats=Object.keys(state.budgets).sort((a,b)=>a.localeCompare(b));
+      const budTb = $("#budTbody"); budTb.innerHTML = "";
+      const cats = Object.keys(state.budgets).sort((a,b)=>a.localeCompare(b));
       for(const c of cats){
-        const limit=state.budgets[c]||0; const spent=spentInMonth(c); const remaining=limit-spent; const red=remaining<0?"style='color:var(--warn)'":"";
-        const tr=document.createElement("tr");
-        tr.innerHTML=`<td><span class="cat">${escapeHtml(c)}</span></td><td class="right mono">${money(limit)}</td><td class="right mono">${money(spent)}</td><td class="right mono" ${red}>${money(remaining)}</td><td class="right"><button class="btn" data-bud-edit="${encodeURIComponent(c)}">Edit</button> <button class="btn danger" data-bud-del="${encodeURIComponent(c)}">Delete</button></td>`;
+        const limit = state.budgets[c] || 0;
+        const spent = spentInMonth(c);
+        const remaining = limit - spent;
+        const red = remaining < 0 ? "style='color:var(--warn)'" : "";
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><span class="cat">${escapeHtml(c)}</span></td>
+          <td class="right mono">${money(limit)}</td>
+          <td class="right mono">${money(spent)}</td>
+          <td class="right mono" ${red}>${money(remaining)}</td>
+          <td class="right">
+            <button class="btn sm" data-bud-edit="${encodeURIComponent(c)}">Edit</button>
+            <button class="btn sm danger" data-bud-del="${encodeURIComponent(c)}">Delete</button>
+          </td>`;
         budTb.appendChild(tr);
       }
+
       refreshCategoryDatalist();
       drawCategoryChart();
     }
-    function spentInMonth(category){ const yyyyMm=$("#month").value || todayISO().slice(0,7); const {start,end}=monthBounds(yyyyMm); return state.transactions.filter(t=>t.type==="EXPENSE" && t.category===category && t.date>=start && t.date<=end).reduce((s,t)=>s+t.amount,0); }
 
-    async function fileSave(){ if(!fileHandle) return; try{ const ok=await verifyPermission(fileHandle,'readwrite'); if(!ok) throw new Error('Permission denied'); const w=await fileHandle.createWritable(); await w.write(new Blob([JSON.stringify(state,null,2)],{type:'application/json'})); await w.close(); }catch(e){ console.warn('file save failed',e); toast('Saving failed — switched to Browser Storage','bad'); storageMode='local'; await idb.set(MODE_KEY,storageMode); await idb.del('dataHandle'); fileHandle=null; lsSave({...state,[MODE_KEY]:storageMode}); renderStorageBadge(); } }
-    async function fileLoad(){ try{ const ok=await verifyPermission(fileHandle,'read'); if(!ok) return false; const text=await (await fileHandle.getFile()).text(); const obj=JSON.parse(text); if(!Array.isArray(obj.transactions)||typeof obj.budgets!=='object'||typeof obj.settings!=='object') return false;
-      state.transactions=obj.transactions.map(t=>({ id:Number(t.id), date:toISO(t.date), amount:Math.abs(Number(t.amount)||0), type:(String(t.type).toUpperCase()==='INCOME'?'INCOME':'EXPENSE'), category:String(t.category||'General'), note:String(t.note||'') }));
-      state.budgets=obj.budgets||{}; state.settings={ currency:obj.settings.currency||'USD', passcodeHash:obj.settings.passcodeHash||null, autoLock: !!obj.settings.autoLock }; state.nextId=Number.isFinite(obj.nextId)?obj.nextId:(maxId()+1); return true; }catch{ return false } }
-    function lsSync(){ lsSave({...state,[MODE_KEY]:storageMode}) }
-    async function persist(){ (storageMode==='file') ? await fileSave() : lsSync() }
+    function spentInMonth(category){
+      const yyyyMm = $("#month").value || todayISO().slice(0,7);
+      const {start,end} = monthBounds(yyyyMm);
+      return state.transactions
+        .filter(t=>t.type==="EXPENSE" && t.category===category && t.date>=start && t.date<=end)
+        .reduce((s,t)=>s+t.amount,0);
+    }
 
-    function add(tx){ const t={ id:state.nextId++, date:toISO(tx.date||todayISO()), amount:Math.abs(Number(tx.amount)||0), type:(String(tx.type||'EXPENSE').toUpperCase()==='INCOME'?'INCOME':'EXPENSE'), category:(tx.category||'General').toString(), note:(tx.note||'').toString() }; state.transactions.push(t); persist(); toast(`${t.type==='INCOME'?'Income':'Expense'} added`,'good'); return t; }
-    function updateTx(id,patch){ const t=state.transactions.find(x=>x.id===id); if(!t) return null; if(patch.amount!=null) t.amount=Math.abs(Number(patch.amount)||0); if(patch.type) t.type=(String(patch.type).toUpperCase()==='INCOME'?'INCOME':'EXPENSE'); if(patch.category!=null) t.category=String(patch.category); if(patch.date) t.date=toISO(patch.date); if(patch.note!=null) t.note=String(patch.note); persist(); toast('Transaction updated','good'); return t; }
-    function removeTx(id){ const i=state.transactions.findIndex(t=>t.id===id); if(i>=0){ state.transactions.splice(i,1); persist(); toast('Transaction deleted','good'); return true;} return false; }
-    function setBudget(cat,limit){ if(!cat) return; state.budgets[String(cat)]=Math.max(0,Number(limit)||0); persist(); toast('Budget saved','good'); }
+    /* ===== Storage backends ===== */
+    async function fileSave(){
+      if (!fileHandle) return;
+      try{
+        const ok = await verifyPermission(fileHandle, 'readwrite');
+        if(!ok) throw new Error('Permission denied');
+        const w = await fileHandle.createWritable();
+        await w.write(new Blob([JSON.stringify(state,null,2)], {type:'application/json'}));
+        await w.close();
+      }catch(e){
+        console.warn('file save failed', e);
+        toast('Saving failed — switched to Browser Storage', 'bad');
+        storageMode = 'local';
+        await idb.set(MODE_KEY, storageMode);
+        await idb.del('dataHandle'); fileHandle = null; lsSave({...state, [MODE_KEY]: storageMode});
+        renderStorageBadge();
+      }
+    }
+    async function fileLoad(){
+      try{
+        const ok = await verifyPermission(fileHandle, 'read');
+        if(!ok) return false;
+        const text = await (await fileHandle.getFile()).text();
+        const obj = JSON.parse(text);
+        if (!Array.isArray(obj.transactions) || typeof obj.budgets !== 'object' || typeof obj.settings!=='object') return false;
+        state.transactions = obj.transactions.map(t=>({
+          id: Number(t.id),
+          date: toISO(t.date),
+          amount: Math.abs(Number(t.amount)||0),
+          type: (String(t.type).toUpperCase()==='INCOME' ? 'INCOME' : 'EXPENSE'),
+          category: String(t.category || 'General'),
+          note: String(t.note || '')
+        }));
+        state.budgets = obj.budgets || {};
+        state.settings = { currency: obj.settings.currency || 'USD', passcodeHash: obj.settings.passcodeHash || null, autoLock: !!obj.settings.autoLock };
+        state.nextId = Number.isFinite(obj.nextId) ? obj.nextId : (maxId()+1);
+        return true;
+      }catch{ return false }
+    }
+    function lsSync(){ lsSave({...state, [MODE_KEY]: storageMode}) }
+    async function persist(){ (storageMode === 'file') ? await fileSave() : lsSync() }
+
+    /* ===== CRUD ===== */
+    function add(tx){
+      const t = {
+        id: state.nextId++,
+        date: toISO(tx.date || todayISO()),
+        amount: Math.abs(Number(tx.amount)||0),
+        type: (String(tx.type||'EXPENSE').toUpperCase()==='INCOME' ? 'INCOME':'EXPENSE'),
+        category: (tx.category||'General').toString(),
+        note: (tx.note||'').toString()
+      };
+      state.transactions.push(t);
+      persist(); toast(`${t.type === 'INCOME' ? 'Income' : 'Expense'} added`, 'good');
+      return t;
+    }
+    function updateTx(id, patch){
+      const t = state.transactions.find(x=>x.id===id); if(!t) return null;
+      if(patch.amount != null) t.amount = Math.abs(Number(patch.amount)||0);
+      if(patch.type) t.type = (String(patch.type).toUpperCase()==='INCOME' ? 'INCOME':'EXPENSE');
+      if(patch.category != null) t.category = String(patch.category);
+      if(patch.date) t.date = toISO(patch.date);
+      if(patch.note != null) t.note = String(patch.note);
+      persist(); toast('Transaction updated', 'good');
+      return t;
+    }
+    function removeTx(id){
+      const i = state.transactions.findIndex(t=>t.id===id);
+      if(i>=0){ state.transactions.splice(i,1); persist(); toast('Transaction deleted','good'); return true; }
+      return false;
+    }
+    function setBudget(cat, limit){ if(!cat) return; state.budgets[String(cat)] = Math.max(0, Number(limit)||0); persist(); toast('Budget saved','good'); }
     function deleteBudget(cat){ delete state.budgets[cat]; persist(); toast('Budget removed','good'); }
 
-    const csvEscape=s=>{ const v=String(s??""); return /[",\n]/.test(v)?`"${v.replace(/"/g,'""')}"`:v; };
-    function toCSV(rows){ const header="id,date,amount,type,category,note"; const body=rows.map(t=>[t.id,t.date,t.amount,t.type,csvEscape(t.category),csvEscape(t.note)].join(",")).join("\n"); return header+"\n"+body; }
-    function parseCSV(text){ const lines=text.trim().split(/\r?\n/); const hdr=lines.shift()||""; if(!/id,date,amount,type,category,note/i.test(hdr)) throw new Error("CSV header must be id,date,amount,type,category,note"); const out=[]; for(const line of lines){ if(!line.trim()) continue; const cols=[]; let cur="",inQ=false; for(let i=0;i<line.length;i++){ const ch=line[i]; if(inQ){ if(ch==='"' && line[i+1]==='"'){ cur+='"'; i++; } else if(ch==='"') inQ=false; else cur+=ch; } else { if(ch===','){ cols.push(cur); cur="" } else if(ch==='"'){ inQ=true } else cur+=ch; } } cols.push(cur); const [idStr,dateStr,amountStr,type,category,note]=cols; out.push({ id:Number(idStr)||(maxId()+1+out.length), date:toISO(dateStr), amount:Math.abs(Number(amountStr)||0), type:(String(type).toUpperCase()==="INCOME"?"INCOME":"EXPENSE"), category:String(category||"General"), note:String(note||"") }); } return out; }
-    function downloadFile(name,content,mime){ const blob=new Blob([content],{type:mime}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }
+    /* ===== CSV/JSON helpers ===== */
+    const csvEscape = s => { const v = String(s ?? ""); return /[",\n]/.test(v) ? `"${v.replace(/"/g,'""')}"` : v; };
+    function toCSV(rows){ const header = "id,date,amount,type,category,note"; const body = rows.map(t=>[t.id,t.date,t.amount,t.type,csvEscape(t.category),csvEscape(t.note)].join(",")).join("\n"); return header+"\n"+body; }
+    function parseCSV(text){
+      const lines = text.trim().split(/\r?\n/); const hdr = lines.shift()||"";
+      if(!/id,date,amount,type,category,note/i.test(hdr)) throw new Error("CSV header must be id,date,amount,type,category,note");
+      const out=[];
+      for(const line of lines){
+        if(!line.trim()) continue;
+        const cols = []; let cur="", inQ=false;
+        for(let i=0;i<line.length;i++){
+          const ch=line[i];
+          if(inQ){
+            if(ch==='"' && line[i+1]==='"'){ cur+='"'; i++; }
+            else if(ch==='"') inQ=false; else cur+=ch;
+          } else {
+            if(ch===','){ cols.push(cur); cur="" }
+            else if(ch==='"'){ inQ=true } else cur+=ch;
+          }
+        }
+        cols.push(cur);
+        const [idStr,dateStr,amountStr,type,category,note] = cols;
+        out.push({
+          id: Number(idStr)|| (maxId()+1+out.length),
+          date: toISO(dateStr),
+          amount: Math.abs(Number(amountStr)||0),
+          type: (String(type).toUpperCase()==="INCOME" ? "INCOME":"EXPENSE"),
+          category: String(category||"General"),
+          note: String(note||"")
+        });
+      }
+      return out;
+    }
+    function downloadFile(name, content, mime){
+      const blob = new Blob([content], {type:mime});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a"); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    }
 
     /* ===== Chart ===== */
-    let chartAnim=null;
-    function calcCategoryData(){ const yyyyMm=$("#month").value||todayISO().slice(0,7); const {start,end}=monthBounds(yyyyMm); const map=new Map(); for(const t of state.transactions){ if(t.type!=='EXPENSE') continue; if(t.date<start || t.date>end) continue; map.set(t.category,(map.get(t.category)||0)+t.amount); } const entries=[...map.entries()].sort((a,b)=>b[1]-a[1]).slice(0,10); return { labels:entries.map(e=>e[0]), values:entries.map(e=>e[1]) }; }
-    function drawCategoryChart(){ const canvas=$("#catChart"); const ctx=canvas.getContext('2d'); const rect=canvas.getBoundingClientRect(); const dpr=window.devicePixelRatio||1; canvas.width=Math.floor(rect.width*dpr); canvas.height=Math.floor(220*dpr); ctx.scale(dpr,dpr); const {labels,values}=calcCategoryData(); ctx.clearRect(0,0,canvas.width,canvas.height); const pad={l:14,r:10,t:10,b:36}; const w=rect.width-pad.l-pad.r; const h=220-pad.t-pad.b; ctx.strokeStyle='rgba(255,255,255,0.12)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(pad.l,pad.t); ctx.lineTo(pad.l,pad.t+h); ctx.lineTo(pad.l+w,pad.t+h); ctx.stroke(); if(values.length===0){ ctx.fillStyle='rgba(255,255,255,0.55)'; ctx.fillText('No expenses this month yet', pad.l+8, pad.t+h/2); return; } const max=Math.max(...values); const barW=Math.max(18, w/Math.max(1, values.length*1.6)); const gap=Math.min(20,(w-barW*values.length)/Math.max(1,values.length-1)); const start=performance.now(), duration=400; cancelAnimationFrame(chartAnim); function frame(now){ const t=Math.min(1,(now-start)/duration); const e=t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2; ctx.clearRect(0,0,canvas.width,canvas.height); ctx.strokeStyle='rgba(255,255,255,0.12)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(pad.l,pad.t); ctx.lineTo(pad.l,pad.t+h); ctx.lineTo(pad.l+w,pad.t+h); ctx.stroke(); for(let i=0;i<values.length;i++){ const x=pad.l+i*(barW+gap); const val=values[i]; const bh=(val/max)*h*e; const grd=ctx.createLinearGradient(x,pad.t+h,x,pad.t+h-bh); grd.addColorStop(0,'rgba(93,211,161,0.25)'); grd.addColorStop(1,'rgba(93,211,161,0.85)'); ctx.fillStyle=grd; ctx.fillRect(x,pad.t+h-bh,barW,bh); ctx.fillStyle='rgba(255,255,255,0.8)'; ctx.font='12px system-ui, Segoe UI, Roboto'; const lbl=labels[i].length>10?labels[i].slice(0,10)+'…':labels[i]; ctx.fillText(lbl,x,pad.t+h+14); ctx.fillStyle='rgba(255,255,255,0.7)'; ctx.font='11px system-ui, Segoe UI, Roboto'; ctx.fillText(money(val), x, pad.t+h-bh-6); } if(t<1) chartAnim=requestAnimationFrame(frame); } chartAnim=requestAnimationFrame(frame); }
+    let chartAnim = null;
+    function calcCategoryData(){
+      const yyyyMm = $("#month").value || todayISO().slice(0,7);
+      const {start,end} = monthBounds(yyyyMm);
+      const map = new Map();
+      for(const t of state.transactions){
+        if(t.type!=='EXPENSE') continue;
+        if(t.date < start || t.date > end) continue;
+        map.set(t.category, (map.get(t.category)||0) + t.amount);
+      }
+      const entries = [...map.entries()].sort((a,b)=>b[1]-a[1]).slice(0,10);
+      const labels = entries.map(e=>e[0]);
+      const values = entries.map(e=>e[1]);
+      return { labels, values };
+    }
+    function drawCategoryChart(){
+      const canvas = $("#catChart");
+      const ctx = canvas.getContext('2d');
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.floor(rect.width * dpr);
+      canvas.height = Math.floor(220 * dpr);
+      ctx.scale(dpr, dpr);
+
+      const {labels, values} = calcCategoryData();
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      const pad = {l: 14, r: 10, t: 10, b: 36};
+      const w = rect.width - pad.l - pad.r;
+      const h = 220 - pad.t - pad.b;
+
+      ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(pad.l, pad.t); ctx.lineTo(pad.l, pad.t+h); ctx.lineTo(pad.l+w, pad.t+h); ctx.stroke();
+
+      if(values.length === 0){
+        ctx.fillStyle = 'rgba(255,255,255,0.55)';
+        ctx.fillText('No expenses this month yet', pad.l+8, pad.t+h/2);
+        return;
+      }
+
+      const max = Math.max(...values);
+      const barW = Math.max(18, w / Math.max(1, values.length*1.6));
+      const gap = Math.min(20, (w - barW*values.length) / Math.max(1, values.length-1));
+
+      const start = performance.now();
+      const duration = 400;
+      cancelAnimationFrame(chartAnim);
+
+      function frame(now){
+        const t = Math.min(1, (now-start)/duration);
+        const e = t<.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2;
+
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(pad.l, pad.t); ctx.lineTo(pad.l, pad.t+h); ctx.lineTo(pad.l+w, pad.t+h); ctx.stroke();
+
+        for(let i=0;i<values.length;i++){
+          const x = pad.l + i*(barW+gap);
+          const val = values[i];
+          const bh = (val/max) * h * e;
+
+          const grd = ctx.createLinearGradient(x, pad.t+h, x, pad.t+h-bh);
+          grd.addColorStop(0, 'rgba(93,211,161,0.25)');
+          grd.addColorStop(1, 'rgba(93,211,161,0.85)');
+          ctx.fillStyle = grd;
+          ctx.fillRect(x, pad.t+h-bh, barW, bh);
+
+          ctx.fillStyle = 'rgba(255,255,255,0.8)';
+          ctx.font = '12px system-ui, Segoe UI, Roboto';
+          const lbl = labels[i].length>10 ? labels[i].slice(0,10)+'…' : labels[i];
+          ctx.fillText(lbl, x, pad.t+h+14);
+
+          ctx.fillStyle = 'rgba(255,255,255,0.7)';
+          ctx.font = '11px system-ui, Segoe UI, Roboto';
+          ctx.fillText(money(val), x, pad.t+h-bh-6);
+        }
+        if(t<1) chartAnim = requestAnimationFrame(frame);
+      }
+      chartAnim = requestAnimationFrame(frame);
+    }
     window.addEventListener('resize', drawCategoryChart);
 
     /* ===== Init & Lock ===== */
     async function init(){
-      $("#month").value=todayISO().slice(0,7); $("#txDate").value=todayISO();
-      await idb.open();
-      const ls=lsLoad(); const storedMode=(ls && ls[MODE_KEY]) || await idb.get(MODE_KEY); if(storedMode) storageMode=storedMode;
-      const maybeHandle=await idb.get('dataHandle'); if(maybeHandle) fileHandle=maybeHandle;
+      $("#month").value = todayISO().slice(0,7);
+      $("#txDate").value = todayISO();
 
-      let loaded=false;
-      if(storageMode==='file' && fileHandle){ loaded=await fileLoad(); if(!loaded){ storageMode='local'; await idb.set(MODE_KEY,'local'); await idb.del('dataHandle'); fileHandle=null; } }
-      if(!loaded && ls){ state.transactions=Array.isArray(ls.transactions)?ls.transactions:[]; state.budgets=ls.budgets&&typeof ls.budgets==="object"?ls.budgets:{}; state.settings=ls.settings&&typeof ls.settings==="object"?{...state.settings,...ls.settings}:state.settings; state.nextId=Number.isFinite(ls.nextId)?ls.nextId:(maxId()+1); }
+      await idb.open();
+      const ls = lsLoad();
+      const storedMode = (ls && ls[MODE_KEY]) || await idb.get(MODE_KEY);
+      if (storedMode) storageMode = storedMode;
+
+      const maybeHandle = await idb.get('dataHandle');
+      if (maybeHandle) fileHandle = maybeHandle;
+
+      let loaded = false;
+      if (storageMode==='file' && fileHandle) {
+        loaded = await fileLoad();
+        if(!loaded){ storageMode='local'; await idb.set(MODE_KEY,'local'); await idb.del('dataHandle'); fileHandle=null; }
+      }
+      if (!loaded && ls){
+        state.transactions = Array.isArray(ls.transactions) ? ls.transactions : [];
+        state.budgets = ls.budgets && typeof ls.budgets === "object" ? ls.budgets : {};
+        state.settings = ls.settings && typeof ls.settings === "object" ? {...state.settings, ...ls.settings} : state.settings;
+        state.nextId = Number.isFinite(ls.nextId) ? ls.nextId : (maxId()+1);
+      }
 
       render(); renderStorageBadge();
-      const firstTime=!storedMode && state.transactions.length===0 && Object.keys(state.budgets).length===0; if(firstTime) $("#storageDlg").showModal();
-      if(state.settings.passcodeHash) await lockScreen();
 
-      $("#currencySelect").value=state.settings.currency || 'USD';
-      $("#currLabel").textContent=currency();
-      $("#autoLockToggle").checked=!!state.settings.autoLock;
+      const firstTime = !storedMode && state.transactions.length===0 && Object.keys(state.budgets).length===0;
+      if (firstTime) $("#storageDlg").showModal();
 
-      document.addEventListener('visibilitychange', ()=>{ if(document.hidden){ if(state.settings.passcodeHash && state.settings.autoLock){ localStorage.setItem('bb_should_lock','1'); } } else { const should=localStorage.getItem('bb_should_lock'); if(should==='1' && state.settings.passcodeHash){ localStorage.removeItem('bb_should_lock'); lockScreen(); } } });
+      if (state.settings.passcodeHash) await lockScreen();
+
+      $("#currencySelect").value = state.settings.currency || 'USD';
+      $("#currLabel").textContent = currency();
+      $("#autoLockToggle").checked = !!state.settings.autoLock;
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          if (state.settings.passcodeHash && state.settings.autoLock) localStorage.setItem('bb_should_lock','1');
+        } else {
+          const should = localStorage.getItem('bb_should_lock');
+          if (should === '1' && state.settings.passcodeHash) {
+            localStorage.removeItem('bb_should_lock');
+            lockScreen();
+          }
+        }
+      });
     }
 
     async function lockScreen(){
-      const dlg=$("#lockDlg"); const input=$("#pinEntry");
+      const dlg = $("#lockDlg");
+      const input = $("#pinEntry");
       dlg.showModal(); await sleep(30); input.focus();
       return new Promise(res=>{
-        const handler=async ()=>{ const pin=input.value.trim(); input.value=''; const hash=await sha256Hex(pin); if(hash===state.settings.passcodeHash){ dlg.close(); toast('Unlocked'); res(true); input.removeEventListener('keydown',onEnter); $("#unlockBtn").removeEventListener('click',handler); } else { toast('Wrong passcode','bad'); input.focus(); } };
-        const onEnter=e=>{ if(e.key==='Enter') handler(); };
-        $("#unlockBtn").addEventListener('click',handler); input.addEventListener('keydown',onEnter);
+        const handler = async ()=>{
+          const pin = input.value.trim(); input.value = '';
+          const hash = await sha256Hex(pin);
+          if (hash === state.settings.passcodeHash){
+            dlg.close(); toast('Unlocked'); res(true);
+            input.removeEventListener('keydown', onEnter);
+            $("#unlockBtn").removeEventListener('click', handler);
+          } else {
+            toast('Wrong passcode','bad'); input.focus();
+          }
+        };
+        const onEnter = (e)=>{ if(e.key==='Enter') handler(); };
+        $("#unlockBtn").addEventListener('click', handler);
+        input.addEventListener('keydown', onEnter);
       });
     }
 
     /* ===== Events ===== */
-    $("#txForm").addEventListener("submit",(e)=>{ e.preventDefault(); const type=$("#txType").value; const amount=Number($("#txAmount").value); const category=$("#txCategory").value.trim()||"General"; const date=$("#txDate").value||todayISO(); const note=$("#txNote").value.trim(); if(!amount||amount<=0){ $("#txAmount").focus(); toast("Enter a valid amount","bad"); return; } add({type,amount,category,date,note}); e.target.reset(); $("#txType").value="EXPENSE"; $("#txDate").value=todayISO(); render(); });
-    document.addEventListener("click",(e)=>{ const del=e.target.closest("[data-del]"); const edit=e.target.closest("[data-edit]"); const budDel=e.target.closest("[data-bud-del]"); const budEdit=e.target.closest("[data-bud-edit]"); if(del){ const id=Number(del.getAttribute("data-del")); if(confirm("Delete this transaction?")){ removeTx(id); render(); } } if(edit){ const id=Number(edit.getAttribute("data-edit")); const t=state.transactions.find(x=>x.id===id); if(!t) return; $("#editId").value=String(t.id); $("#editType").value=t.type; $("#editAmount").value=String(t.amount); $("#editCategory").value=t.category; $("#editDate").value=t.date; $("#editNote").value=t.note||""; $("#editDlg").showModal(); } if(budDel){ const cat=decodeURIComponent(budDel.getAttribute("data-bud-del")); if(confirm(`Delete budget for "${cat}"?`)){ deleteBudget(cat); render(); } } if(budEdit){ const cat=decodeURIComponent(budEdit.getAttribute("data-bud-edit")); const newLimit=prompt(`Set monthly limit for "${cat}"`, String(state.budgets[cat]||0)); if(newLimit!=null){ setBudget(cat, Number(newLimit)||0); render(); } } });
-    $("#editCancel").addEventListener("click",()=>$("#editDlg").close());
-    $("#editSave").addEventListener("click",()=>{ const id=Number($("#editId").value); updateTx(id,{ type:$("#editType").value, amount:Number($("#editAmount").value), category:$("#editCategory").value.trim(), date:$("#editDate").value, note:$("#editNote").value.trim() }); $("#editDlg").close(); render(); });
-    $("#editDelete").addEventListener("click",()=>{ const id=Number($("#editId").value); if(confirm("Delete this transaction?")){ removeTx(id); $("#editDlg").close(); render(); } });
+    $("#txForm").addEventListener("submit", (e)=>{
+      e.preventDefault();
+      const type = $("#txType").value;
+      const amount = Number($("#txAmount").value);
+      const category = $("#txCategory").value.trim() || "General";
+      const date = $("#txDate").value || todayISO();
+      const note = $("#txNote").value.trim();
+      if(!amount || amount<=0){ $("#txAmount").focus(); toast("Enter a valid amount","bad"); return; }
+      add({ type, amount, category, date, note });
+      e.target.reset();
+      $("#txType").value = "EXPENSE"; $("#txDate").value = todayISO();
+      render();
+    });
 
-    $("#typeFilter").addEventListener("change",render);
-    $("#categoryFilter").addEventListener("input",render);
-    $("#month").addEventListener("change",render);
+    document.addEventListener("click", (e)=>{
+      const del = e.target.closest("[data-del]");
+      const edit = e.target.closest("[data-edit]");
+      const budDel = e.target.closest("[data-bud-del]");
+      const budEdit = e.target.closest("[data-bud-edit]");
 
-    $("#budForm").addEventListener("submit",(e)=>{ e.preventDefault(); const cat=$("#budCat").value.trim(); const limit=Number($("#budLimit").value); if(!cat){ $("#budCat").focus(); toast("Category required","bad"); return; } setBudget(cat,limit); e.target.reset(); render(); });
+      if(del){
+        const id = Number(del.getAttribute("data-del"));
+        if(confirm("Delete this transaction?")){ removeTx(id); render(); }
+      }
+      if(edit){
+        const id = Number(edit.getAttribute("data-edit"));
+        const t = state.transactions.find(x=>x.id===id); if(!t) return;
+        $("#editId").value = String(t.id);
+        $("#editType").value = t.type;
+        $("#editAmount").value = String(t.amount);
+        $("#editCategory").value = t.category;
+        $("#editDate").value = t.date;
+        $("#editNote").value = t.note || "";
+        $("#editDlg").showModal();
+      }
+      if(budDel){
+        const cat = decodeURIComponent(budDel.getAttribute("data-bud-del"));
+        if(confirm(`Delete budget for "${cat}"?`)){ deleteBudget(cat); render(); }
+      }
+      if(budEdit){
+        const cat = decodeURIComponent(budEdit.getAttribute("data-bud-edit"));
+        const newLimit = prompt(`Set monthly limit for "${cat}"`, String(state.budgets[cat]||0));
+        if(newLimit!=null){ setBudget(cat, Number(newLimit)||0); render(); }
+      }
+    });
 
-    $("#exportCsv").addEventListener("click",()=>{ downloadFile("transactions.csv", toCSV(state.transactions), "text/csv;charset=utf-8"); toast("CSV exported"); });
-    $("#exportJson").addEventListener("click",()=>{ downloadFile("budgetbuddy.json", JSON.stringify(state,null,2), "application/json"); toast("JSON exported"); });
+    $("#editCancel").addEventListener("click", ()=> $("#editDlg").close());
+    $("#editSave").addEventListener("click", ()=>{
+      const id = Number($("#editId").value);
+      updateTx(id, {
+        type: $("#editType").value,
+        amount: Number($("#editAmount").value),
+        category: $("#editCategory").value.trim(),
+        date: $("#editDate").value,
+        note: $("#editNote").value.trim()
+      });
+      $("#editDlg").close(); render();
+    });
+    $("#editDelete").addEventListener("click", ()=>{
+      const id = Number($("#editId").value);
+      if(confirm("Delete this transaction?")){ removeTx(id); $("#editDlg").close(); render(); }
+    });
 
-    $("#importFile").addEventListener("change", async (e)=>{ const file=e.target.files?.[0]; if(!file) return; const text=await file.text(); try{ if(file.name.toLowerCase().endsWith(".json") || text.trim().startsWith("{")){ const obj=JSON.parse(text); if(!Array.isArray(obj.transactions)||typeof obj.budgets!=="object") throw new Error("Invalid JSON"); state.transactions=obj.transactions.map(t=>({ id:Number(t.id), date:toISO(t.date), amount:Math.abs(Number(t.amount)||0), type:(String(t.type).toUpperCase()==="INCOME"?"INCOME":"EXPENSE"), category:String(t.category||"General"), note:String(t.note||"") })); state.budgets=obj.budgets||{}; if(obj.settings&&obj.settings.currency) state.settings.currency=obj.settings.currency; if(obj.settings&&typeof obj.settings.autoLock==='boolean') state.settings.autoLock=obj.settings.autoLock; state.nextId=Number.isFinite(obj.nextId)?obj.nextId:(maxId()+1); } else { const imported=parseCSV(text); for(const r of imported){ state.transactions.push(r); state.nextId=Math.max(state.nextId,r.id+1); } } await persist(); toast("Import complete"); e.target.value=""; render(); }catch(err){ toast("Import failed: "+err.message,'bad'); } });
+    $("#typeFilter").addEventListener("change", render);
+    $("#categoryFilter").addEventListener("input", render);
+    $("#month").addEventListener("change", render);
 
-    $("#clearAll").addEventListener("click", async ()=>{ if(confirm('Type "YES" to wipe everything.')){ const sure=prompt('Confirm by typing YES'); if(sure==="YES"){ state.transactions=[]; state.budgets={}; state.nextId=1; await persist(); render(); toast("All data cleared",'bad'); } } });
+    $("#budForm").addEventListener("submit", (e)=>{
+      e.preventDefault();
+      const cat = $("#budCat").value.trim();
+      const limit = Number($("#budLimit").value);
+      if(!cat){ $("#budCat").focus(); toast("Category required","bad"); return; }
+      setBudget(cat, limit);
+      e.target.reset(); render();
+    });
 
-    $("#changeStorage").addEventListener("click",()=>$("#storageDlg").showModal());
-    $("#pickBrowser").addEventListener("click", async ()=>{ storageMode='local'; await idb.set(MODE_KEY,storageMode); await idb.del('dataHandle'); fileHandle=null; lsSync(); $("#storageDlg").close(); renderStorageBadge(); toast("Using Browser Storage"); });
-    $("#pickFile").addEventListener("click", async ()=>{ if(!('showSaveFilePicker' in window)){ toast('File picker not supported here','bad'); return; } try{ const handle=await window.showSaveFilePicker({ suggestedName:'budgetbuddy-data.json', types:[{ description:'JSON file', accept:{ 'application/json':['.json'] } }] }); fileHandle=handle; storageMode='file'; await idb.set('dataHandle',fileHandle); await idb.set(MODE_KEY,storageMode); const file=await fileHandle.getFile(); if((file.size||0)>0) await fileLoad(); else await fileSave(); $("#storageDlg").close(); renderStorageBadge(); render(); toast("Saving to your chosen file"); }catch(e){ if(!(e && e.name==='AbortError')) toast('Could not choose file','bad'); } });
+    $("#exportCsv").addEventListener("click", ()=>{
+      downloadFile("transactions.csv", toCSV(state.transactions), "text/csv;charset=utf-8");
+      toast("CSV exported");
+    });
+    $("#exportJson").addEventListener("click", ()=>{
+      downloadFile("budgetbuddy.json", JSON.stringify(state, null, 2), "application/json");
+      toast("JSON exported");
+    });
 
-    $("#openSettings").addEventListener("click",()=>{ $("#currencySelect").value=state.settings.currency||'USD'; $("#customCurr").value=''; $("#autoLockToggle").checked=!!state.settings.autoLock; $("#settingsDlg").showModal(); });
-    $("#saveCurrency").addEventListener("click", async ()=>{ const sel=$("#currencySelect").value; const custom=$("#customCurr").value.trim().toUpperCase(); state.settings.currency=custom||sel||'USD'; state.settings.autoLock=!!$("#autoLockToggle").checked; await persist(); $("#currLabel").textContent=state.settings.currency; $("#settingsDlg").close(); render(); toast('Settings saved'); });
-    $("#closeSettings").addEventListener("click",()=>$("#settingsDlg").close());
-    $("#savePin").addEventListener("click", async ()=>{ const a=$("#newPin").value.trim(); const b=$("#confirmPin").value.trim(); if(!/^\d{4,8}$/.test(a)){ toast('Passcode must be 4–8 digits','bad'); return; } if(a!==b){ toast('Passcodes do not match','bad'); return; } state.settings.passcodeHash=await sha256Hex(a); $("#newPin").value=$("#confirmPin").value=''; await persist(); toast('Passcode set'); });
-    $("#clearPin").addEventListener("click", async ()=>{ state.settings.passcodeHash=null; await persist(); toast('Passcode removed'); });
-    $("#lockNow").addEventListener("click", async ()=>{ if(!state.settings.passcodeHash){ toast('No passcode set (Settings)','bad'); return; } await lockScreen(); });
+    $("#importFile").addEventListener("change", async (e)=>{
+      const file = e.target.files?.[0]; if(!file) return;
+      const text = await file.text();
+      try{
+        if(file.name.toLowerCase().endsWith(".json") || text.trim().startsWith("{")){
+          const obj = JSON.parse(text);
+          if(!Array.isArray(obj.transactions) || typeof obj.budgets!=="object") throw new Error("Invalid JSON");
+          state.transactions = obj.transactions.map(t=>({
+            id: Number(t.id),
+            date: toISO(t.date),
+            amount: Math.abs(Number(t.amount)||0),
+            type: (String(t.type).toUpperCase()==="INCOME" ? "INCOME":"EXPENSE"),
+            category: String(t.category||"General"),
+            note: String(t.note||"")
+          }));
+          state.budgets = obj.budgets || {};
+          if (obj.settings && obj.settings.currency) state.settings.currency = obj.settings.currency;
+          if (obj.settings && typeof obj.settings.autoLock === 'boolean') state.settings.autoLock = obj.settings.autoLock;
+          state.nextId = Number.isFinite(obj.nextId) ? obj.nextId : (maxId()+1);
+        } else {
+          const imported = parseCSV(text);
+          for(const r of imported){
+            state.transactions.push(r);
+            state.nextId = Math.max(state.nextId, r.id+1);
+          }
+        }
+        await persist(); toast("Import complete");
+        e.target.value = ""; render();
+      }catch(err){ toast("Import failed: " + err.message, 'bad') }
+    });
 
-    if('serviceWorker' in navigator){ window.addEventListener('load', ()=>{ navigator.serviceWorker.register('./service-worker.js').catch(()=>{}); }); }
+    $("#clearAll").addEventListener("click", async ()=>{
+      if(confirm('Type "YES" to wipe everything.')) {
+        const sure = prompt('Confirm by typing YES');
+        if(sure==="YES"){
+          state.transactions = []; state.budgets = {}; state.nextId = 1;
+          await persist(); render(); toast("All data cleared",'bad');
+        }
+      }
+    });
+
+    $("#changeStorage").addEventListener("click", ()=> $("#storageDlg").showModal());
+    $("#pickBrowser").addEventListener("click", async ()=>{
+      storageMode = 'local'; await idb.set(MODE_KEY, storageMode); await idb.del('dataHandle'); fileHandle=null; lsSync();
+      $("#storageDlg").close(); renderStorageBadge(); toast("Using Browser Storage");
+    });
+    $("#pickFile").addEventListener("click", async ()=>{
+      if (!('showSaveFilePicker' in window)){ toast('File picker not supported here','bad'); return; }
+      try{
+        const handle = await window.showSaveFilePicker({
+          suggestedName: 'budgetbuddy-data.json',
+          types: [{ description: 'JSON file', accept: { 'application/json': ['.json'] } }]
+        });
+        fileHandle = handle; storageMode='file';
+        await idb.set('dataHandle', fileHandle); await idb.set(MODE_KEY, storageMode);
+        const file = await fileHandle.getFile();
+        if ((file.size||0) > 0) await fileLoad(); else await fileSave();
+        $("#storageDlg").close(); renderStorageBadge(); render(); toast("Saving to your chosen file");
+      }catch(e){ if(!(e && e.name==='AbortError')) toast('Could not choose file','bad') }
+    });
+
+    $("#openSettings").addEventListener("click", ()=>{
+      $("#currencySelect").value = state.settings.currency || 'USD';
+      $("#customCurr").value = '';
+      $("#autoLockToggle").checked = !!state.settings.autoLock;
+      $("#settingsDlg").showModal();
+    });
+    $("#saveCurrency").addEventListener("click", async ()=>{
+      const sel = $("#currencySelect").value;
+      const custom = $("#customCurr").value.trim().toUpperCase();
+      state.settings.currency = custom || sel || 'USD';
+      state.settings.autoLock = !!$("#autoLockToggle").checked;
+      await persist();
+      $("#currLabel").textContent = state.settings.currency;
+      $("#settingsDlg").close();
+      render();
+      toast('Settings saved');
+    });
+    $("#closeSettings").addEventListener("click", ()=> $("#settingsDlg").close());
+    $("#savePin").addEventListener("click", async ()=>{
+      const a = $("#newPin").value.trim();
+      const b = $("#confirmPin").value.trim();
+      if(!/^\d{4,8}$/.test(a)){ toast('Passcode must be 4–8 digits','bad'); return; }
+      if(a !== b){ toast('Passcodes do not match','bad'); return; }
+      state.settings.passcodeHash = await sha256Hex(a);
+      $("#newPin").value = $("#confirmPin").value = '';
+      await persist();
+      toast('Passcode set');
+    });
+    $("#clearPin").addEventListener("click", async ()=>{
+      state.settings.passcodeHash = null;
+      await persist(); toast('Passcode removed');
+    });
+    $("#lockNow").addEventListener("click", async ()=>{
+      if(!state.settings.passcodeHash){ toast('No passcode set (Settings)','bad'); return; }
+      await lockScreen();
+    });
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+      });
+    }
+
     init();
   })();
   </script>
