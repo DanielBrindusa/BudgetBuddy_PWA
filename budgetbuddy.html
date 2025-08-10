@@ -43,6 +43,8 @@
       margin:0; font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
       color:var(--text); background: var(--bg); background-image: var(--bg-grad);
       -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+      /* NEW: avoid tiny accidental horizontal scrollbars on mobile */
+      overflow-x: hidden;
     }
 
     /* ======= App Shell ======= */
@@ -51,7 +53,8 @@
       background: linear-gradient(180deg, rgba(10,14,20,.75), rgba(10,14,20,.35), transparent);
       border-bottom: 1px solid var(--outline);
     }
-    .wrap{ max-width:1100px; margin:0 auto; padding:14px 16px; }
+    /* UPDATED: symmetric gutters using logical properties */
+    .wrap{ max-width:1100px; margin:0 auto; padding-inline:16px; padding-block:14px; }
 
     /* Header layout (two neat rows) */
     .brand{ display:flex; flex-direction:column; align-items:flex-start; gap:12px; margin:0 0 12px 0; }
@@ -150,23 +153,8 @@
     .sr-only{ position:absolute; left:-10000px; top:auto; width:1px; height:1px; overflow:hidden }
     footer{ color:var(--muted); padding:0 16px 26px; margin-top:16px }
 
-
-
-	/* --- Unfreeze the app header --- */
-	header{
-	  position: static !important;  /* was: sticky */
-	  top: auto !important;
-	}
-
-	/* --- Unfreeze table header row inside the transactions/budgets tables --- */
-	table th{
-	  position: static !important;  /* was: sticky */
-	  top: auto !important;
-	}
-
-
-
-
+    /* NEW: move main padding out of inline style into CSS, symmetric */
+    main.wrap{ padding-block:16px 24px; }
   </style>
 </head>
 <body>
@@ -191,10 +179,10 @@
           <input id="importFile" type="file" accept=".csv,.json,text/csv,application/json" class="sr-only" />
           <button id="clearAll" class="btn danger">Reset</button>
         </div>
-	<div class="actionsRedo">
-            <button id="undoBtn" class="btn" title="Undo (Ctrl+Z)">Undo</button>
-            <button id="redoBtn" class="btn" title="Redo (Ctrl+Y)">Redo</button>
-          </div>
+        <div class="actionsRedo">
+          <button id="undoBtn" class="btn" title="Undo (Ctrl+Z)">Undo</button>
+          <button id="redoBtn" class="btn" title="Redo (Ctrl+Y)">Redo</button>
+        </div>
       </div>
 
       <div class="filters">
@@ -211,7 +199,7 @@
           <input id="categoryFilter" type="text" list="cats" placeholder="All" />
           <datalist id="cats"></datalist>
         </div>
-	<br><br>
+        <br><br>
         <div class="row-center">
           <span class="chip">Currency: <strong id="currLabel" style="margin-left:6px">USD</strong></span>
           <button id="lockNow" class="btn">Lock now</button>
@@ -229,6 +217,7 @@
     </div>
   </header>
 
+  <!-- UPDATED: removed inline padding style; CSS handles it -->
   <main class="wrap grid grid-2">
     <!-- Transactions -->
     <section class="card">
@@ -775,7 +764,6 @@
       function resetAll(){ setState({attempts:0, chills:0, coolUntil:0, postChillAttempts:0}); }
 
       async function maybeWipe(){
-        // wipe data and local storage keys
         state.transactions=[]; state.budgets={}; state.recurring=[]; state.trash=[]; state.nextId=1;
         await persist(); render(); resetAll(); toast('All data wiped due to repeated failed passcode attempts','bad');
       }
@@ -803,7 +791,6 @@
       return new Promise(res=>{
         const handler=async ()=>{
           const pin=input.value.trim(); input.value='';
-          // cooldown still?
           const still=await checkCooldown(); if(still) return;
 
           const st=getState();
@@ -813,7 +800,6 @@
             input.removeEventListener('keydown',onEnter); $("#unlockBtn").removeEventListener('click',handler); return;
           }
 
-          // wrong
           if(st.chills<CHILLS.length){
             const attempts=st.attempts+1;
             if(attempts>=3){
@@ -827,7 +813,6 @@
               info.textContent=`Wrong passcode. Attempts: ${attempts}/3 before cooldown.`;
             }
           } else {
-            // after 3 chills, allow 3 more attempts then wipe
             const n=st.postChillAttempts+1;
             if(n>=3){ dlg.close(); await maybeWipe(); res(false); }
             else { setState({postChillAttempts:n}); info.textContent=`Wrong. Final attempts: ${n}/3 before data wipe.`; }
