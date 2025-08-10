@@ -371,7 +371,25 @@
     const addDays = (iso, n)=> toISO(new Date(new Date(iso).getTime()+n*86400000));
     const addMonths = (iso, n)=>{ const d=new Date(iso); d.setUTCMonth(d.getUTCMonth()+n); return toISO(d); };
 
-    function toast(msg, kind='good'){ const host=$("#toasts"); const t=document.createElement("div"); t.className=`toast ${kind}`; t.textContent=msg; host.appendChild(t); setTimeout(()=>{t.style.opacity=.9},10); setTimeout(()=>{t.style.opacity=0; t.style.transform='translateY(8px)'; t.addEventListener('transitionend',()=>t.remove(),{once:true});},3200); }
+function toast(msg, kind='good'){
+  const host = document.querySelector("#toasts");
+  const t = document.createElement("div");
+  t.className = `toast ${kind}`;
+  t.textContent = msg;
+  host.appendChild(t);
+
+  setTimeout(()=>{ t.style.opacity = .9; }, 10);
+
+  setTimeout(()=>{
+    t.style.opacity = 0;
+    t.style.transform = 'translateY(8px)';
+    const remove = () => t.remove();
+    t.addEventListener('transitionend', remove, { once: true });
+    // Fallback in case transitionend doesn't fire
+    setTimeout(remove, 700);
+  }, 3200);
+}
+
 
     async function sha256Hex(str){ const data=new TextEncoder().encode(str); const hash=await crypto.subtle.digest('SHA-256',data); return [...new Uint8Array(hash)].map(b=>b.toString(16).padStart(2,'0')).join(''); }
 
