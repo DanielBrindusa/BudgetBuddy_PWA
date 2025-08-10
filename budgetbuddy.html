@@ -172,11 +172,11 @@
           <label class="btn" for="importFile" title="Import CSV or JSON">Import…</label>
           <input id="importFile" type="file" accept=".csv,.json,text/csv,application/json" class="sr-only" />
           <button id="clearAll" class="btn danger">Reset</button>
-          <div style="margin-left:auto; display:flex; gap:8px">
+        </div>
+	<div class="actionsRedo">
             <button id="undoBtn" class="btn" title="Undo (Ctrl+Z)">Undo</button>
             <button id="redoBtn" class="btn" title="Redo (Ctrl+Y)">Redo</button>
           </div>
-        </div>
       </div>
 
       <div class="filters">
@@ -193,7 +193,7 @@
           <input id="categoryFilter" type="text" list="cats" placeholder="All" />
           <datalist id="cats"></datalist>
         </div>
-        <div class="row-center" style="margin-left:auto">
+        <div class="row-center">
           <span class="chip">Currency: <strong id="currLabel" style="margin-left:6px">USD</strong></span>
           <button id="lockNow" class="btn">Lock now</button>
         </div>
