@@ -1,0 +1,173 @@
+/* ======= Design System ======= */
+:root{
+  --bg: #0c1117;
+  --bg-grad: radial-gradient(1200px 800px at 20% -10%, #1a2332 0%, #0c1117 40%), radial-gradient(800px 600px at 120% -20%, #182031 0%, #0c1117 45%);
+  --surface: rgba(255,255,255,0.04);
+  --surface-2: rgba(255,255,255,0.06);
+  --outline: rgba(255,255,255,0.10);
+  --text: #e9eef6;
+  --muted: #a8b3c7;
+  --primary: #5dd3a1;
+  --warn: #ff6b6b;
+  --focus: #94c2ff;
+  --shadow: 0 10px 30px rgba(0,0,0,.35);
+  --radius: 14px;
+  --radius-sm: 10px;
+  --blur: 10px;
+  --speed: .25s;
+  --speed-slow: .4s;
+}
+@media (prefers-color-scheme: light){
+  :root{
+    --bg:#f5f7fb;
+    --bg-grad: radial-gradient(1200px 800px at 20% -10%, #ffffff 0%, #f5f7fb 40%), radial-gradient(800px 600px at 120% -20%, #ffffff 0%, #f5f7fb 45%);
+    --surface: rgba(0,0,0,0.04);
+    --surface-2: rgba(0,0,0,0.06);
+    --outline: rgba(0,0,0,0.10);
+    --text:#0b1220; --muted:#3a4656;
+    --primary:#1a7f5a; --warn:#c62828; --focus:#2458b6;
+  }
+}
+*{ box-sizing:border-box }
+html,body{ height:100% }
+body{
+  margin:0; font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  color:var(--text); background: var(--bg); background-image: var(--bg-grad);
+  -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+}
+
+/* ======= App Shell ======= */
+header{
+  position: sticky; top:0; z-index: 10; backdrop-filter: blur(var(--blur)) saturate(1.2);
+  background: linear-gradient(180deg, rgba(10,14,20,.75), rgba(10,14,20,.35), transparent);
+  border-bottom: 1px solid var(--outline);
+}
+.wrap{ max-width:1100px; margin:0 auto; padding:14px 16px; }
+
+/* Header layout (two neat rows) */
+.brand{ display:flex; flex-direction:column; align-items:flex-start; gap:12px; margin:0 0 12px 0; }
+.brand-top{ display:flex; align-items:center; flex-wrap:wrap; gap:10px; }
+.toolbar{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:flex-start; }
+
+.logo{ width:34px; height:34px; border-radius:8px; background: radial-gradient(100% 100% at 30% 20%, #76f0c0, #2f7d62); box-shadow: 0 6px 16px rgba(93,211,161,.35), inset 0 0 20px rgba(255,255,255,.2); }
+.brand h1{ font-size:1.15rem; letter-spacing:.2px; margin:0 }
+.chip{ display:inline-flex; align-items:center; gap:8px; border:1px solid var(--outline); background:var(--surface); padding:9px 12px; border-radius:999px; color:var(--muted); }
+.btn{
+  appearance:none; border:1px solid var(--outline); background:linear-gradient(180deg, var(--surface-2), var(--surface));
+  color:var(--text); padding:10px 14px; border-radius:999px; cursor:pointer;
+  transition: transform var(--speed), box-shadow var(--speed), background var(--speed);
+  box-shadow: 0 2px 10px rgba(0,0,0,.2);
+}
+.btn:hover{ transform: translateY(-1px) }
+.btn:active{ transform: translateY(0) scale(.98) }
+.btn.primary{ border-color: color-mix(in oklab, var(--primary) 50%, var(--outline)); background: linear-gradient(180deg, color-mix(in oklab, var(--primary) 30%, transparent), var(--surface)); }
+.btn.danger{ border-color: color-mix(in oklab, var(--warn) 40%, var(--outline)); color: var(--warn); }
+.icon-btn{ padding:10px 12px }
+
+input[type="text"], input[type="number"], input[type="date"], input[type="month"], select, textarea{
+  width:100%; padding:11px 12px; border-radius: var(--radius-sm);
+  border:1px solid var(--outline); background: var(--surface); color:var(--text);
+  outline:none; transition: border-color var(--speed), background var(--speed);
+}
+input:focus, select:focus, textarea:focus{ border-color: var(--focus); box-shadow: 0 0 0 4px color-mix(in oklab, var(--focus) 26%, transparent); background: var(--surface-2); }
+
+.grid{ display:grid; gap:16px }
+.grid-2{ grid-template-columns: 1fr }
+@media (min-width:980px){ .grid-2{ grid-template-columns: 2fr 1fr } }
+
+.card{
+  border:1px solid var(--outline); border-radius: var(--radius);
+  background: color-mix(in oklab, var(--surface) 80%, transparent);
+  box-shadow: var(--shadow); backdrop-filter: blur(calc(var(--blur) * .6));
+  transition: transform var(--speed-slow), box-shadow var(--speed-slow), border-color var(--speed);
+}
+.card:hover{ transform: translateY(-2px); box-shadow: 0 14px 36px rgba(0,0,0,.38) }
+.card > .pad{ padding:16px }
+.row{ display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end }
+label{ font-size:.9rem; color:var(--muted); display:block; margin:0 0 6px 4px }
+
+/* ======= Totals ======= */
+.totals{ display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; margin-top:10px }
+.pill{ border:1px solid var(--outline); border-radius: var(--radius-sm); background: linear-gradient(180deg, var(--surface-2), var(--surface)); padding:14px 16px; text-align:center; position:relative; overflow:hidden; }
+.pill .label{ display:block; color:var(--muted); font-size:.9rem }
+.pill .val{ display:block; font-weight:700; font-size:1.25rem; letter-spacing:.2px }
+.income .val{ color: var(--primary) }
+.expense .val{ color: var(--warn) }
+
+/* ======= Tables ======= */
+.table-wrap{ overflow:auto; border-radius:0 0 var(--radius) var(--radius) }
+table{ width:100%; border-collapse:collapse; }
+th, td{ border-bottom:1px solid var(--outline); padding:12px; text-align:left; vertical-align:top }
+th{ color:var(--muted); font-weight:600; font-size:.9rem; backdrop-filter: blur(calc(var(--blur)*.4)); position:sticky; top:0; background: color-mix(in oklab, var(--surface) 75%, transparent); }
+tr{ transition: background var(--speed) }
+tr:hover td{ background: color-mix(in oklab, var(--surface) 50%, transparent) }
+.right{ text-align:right }
+.mono{ font-variant-numeric: tabular-nums }
+.cat{ padding:2px 10px; border-radius:999px; background: color-mix(in oklab, var(--surface) 65%, transparent); }
+
+/* Swipe affordance */
+tr.swipeable { touch-action: pan-y; }
+tr.swiping td { transition: none !important; }
+tr.swipe-delete td { background: color-mix(in oklab, var(--warn) 20%, transparent); }
+tr.swipe-edit td { background: color-mix(in oklab, var(--primary) 20%, transparent); }
+
+/* ======= Dialogs ======= */
+dialog{
+  border:none; border-radius: var(--radius); background: color-mix(in oklab, var(--surface) 90%, transparent);
+  color:var(--text); box-shadow: var(--shadow); border:1px solid var(--outline); width:min(720px, calc(100% - 32px));
+  animation: pop .18s ease-out forwards; transform-origin: center;
+  backdrop-filter: blur(var(--blur));
+}
+dialog::backdrop{ background: rgba(0,0,0,.35); backdrop-filter: blur(2px) }
+@keyframes pop{ from{ transform: scale(.96); opacity:.0 } to{ transform: scale(1); opacity:1 } }
+.dlg-head{ padding:14px 16px; border-bottom:1px solid var(--outline); font-weight:700 }
+.dlg-body{ padding:16px }
+.dlg-foot{ padding:12px 16px; border-top:1px solid var(--outline); display:flex; gap:8px; justify-content:flex-end }
+.dlg-postfoot{ padding:8px 16px 16px; text-align:center }
+.dlg-postfoot .hint{ display:inline-block; margin-top:6px }
+
+/* ======= Toasts & Chart ======= */
+.toasts{ position: fixed; right: 18px; bottom: 18px; display:flex; flex-direction:column; gap:10px; z-index: 9999; }
+.toast{ border:1px solid var(--outline); background: color-mix(in oklab, var(--surface) 96%, transparent); padding:10px 12px; border-radius: 10px; box-shadow: var(--shadow); transform: translateY(8px); opacity:0; animation: slideIn .22s ease-out forwards; }
+@keyframes slideIn { to { transform: translateY(0); opacity:1 } }
+.toast.good{ border-color: color-mix(in oklab, var(--primary) 40%, var(--outline)) }
+.toast.bad{ border-color: color-mix(in oklab, var(--warn) 40%, var(--outline)) }
+.chart-wrap{ padding:14px 16px 6px; }
+canvas{ width:100%; height:220px; display:block }
+
+/* ======= Small bits ======= */
+.row-center{ display:flex; gap:10px; align-items:center; flex-wrap:wrap }
+.hint{ color:var(--muted); font-size:.9rem }
+.sr-only{ position:absolute; left:-10000px; top:auto; width:1px; height:1px; overflow:hidden }
+footer{ color:var(--muted); padding:0 16px 26px; margin-top:16px }
+
+/* --- Unfreeze the app header --- */
+header{
+  position: static !important;  /* was: sticky */
+  top: auto !important;
+}
+
+/* --- Unfreeze table header row inside the transactions/budgets tables --- */
+table th{
+  position: static !important;  /* was: sticky */
+  top: auto !important;
+}
+
+/* ======= Tooltip (NEW) ======= */
+.bb-tooltip {
+  position: absolute;
+  z-index: 9999;
+  pointer-events: none;
+  background: #111;
+  color: #fff;
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1;
+  box-shadow: 0 4px 12px rgba(0,0,0,.2);
+  opacity: 0;
+  transform: translateY(-2px);
+  transition: opacity .12s ease, transform .12s ease;
+}
+.bb-tooltip-show { opacity: 1; transform: translateY(0); }
+.bb-tooltip-leave { opacity: 0 !important; transform: translateY(-2px) !important; }
