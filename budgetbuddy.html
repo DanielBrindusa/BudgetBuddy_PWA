@@ -149,6 +149,24 @@
     .hint{ color:var(--muted); font-size:.9rem }
     .sr-only{ position:absolute; left:-10000px; top:auto; width:1px; height:1px; overflow:hidden }
     footer{ color:var(--muted); padding:0 16px 26px; margin-top:16px }
+
+
+
+	/* --- Unfreeze the app header --- */
+	header{
+	  position: static !important;  /* was: sticky */
+	  top: auto !important;
+	}
+
+	/* --- Unfreeze table header row inside the transactions/budgets tables --- */
+	table th{
+	  position: static !important;  /* was: sticky */
+	  top: auto !important;
+	}
+
+
+
+
   </style>
 </head>
 <body>
