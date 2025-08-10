@@ -25,7 +25,6 @@
       --blur: 10px;
       --speed: .25s;
       --speed-slow: .4s;
-      --page-pad: clamp(16px, 4vw, 28px);
     }
     @media (prefers-color-scheme: light){
       :root{
@@ -52,7 +51,7 @@
       background: linear-gradient(180deg, rgba(10,14,20,.75), rgba(10,14,20,.35), transparent);
       border-bottom: 1px solid var(--outline);
     }
-    .wrap{ max-width:1100px; margin:0 auto; padding:14px var(--page-pad); }
+    .wrap{ max-width:1100px; margin:0 auto; padding:14px 16px; }
 
     /* Header layout (two neat rows) */
     .brand{ display:flex; flex-direction:column; align-items:flex-start; gap:12px; margin:0 0 12px 0; }
@@ -149,23 +148,25 @@
     .row-center{ display:flex; gap:10px; align-items:center; flex-wrap:wrap }
     .hint{ color:var(--muted); font-size:.9rem }
     .sr-only{ position:absolute; left:-10000px; top:auto; width:1px; height:1px; overflow:hidden }
-    footer{ color:var(--muted); padding:0 var(--page-pad) 26px; margin-top:16px }
+    footer{ color:var(--muted); padding:0 16px 26px; margin-top:16px }
 
-    /* ======= Custom tooltip ======= */
-    .bb-tooltip{
-      position: fixed; z-index: 10000; pointer-events:none;
-      background: color-mix(in oklab, var(--surface) 96%, transparent);
-      border: 1px solid var(--outline);
-      border-radius: 8px; padding:8px 10px; font-size:.9rem; color:var(--text);
-      box-shadow: var(--shadow); opacity:0; transform: translateY(-4px);
-      transition: opacity .12s ease-out, transform .12s ease-out;
-      max-width: 280px;
-    }
-    .bb-tooltip.show{ opacity:1; transform: translateY(0); }
-    /* Prevent scroll when a dialog is open */
-    .modal-open{
-      position: fixed; overflow: hidden; width: 100%;
-    }
+
+
+	/* --- Unfreeze the app header --- */
+	header{
+	  position: static !important;  /* was: sticky */
+	  top: auto !important;
+	}
+
+	/* --- Unfreeze table header row inside the transactions/budgets tables --- */
+	table th{
+	  position: static !important;  /* was: sticky */
+	  top: auto !important;
+	}
+
+
+
+
   </style>
 </head>
 <body>
@@ -176,24 +177,24 @@
         <div class="brand-top">
           <div class="logo" aria-hidden="true"></div>
           <h1>BudgetBuddy</h1>
-          <span id="storageBadge" class="chip" data-tip="Where your data is saved">Storage: …</span>
-          <button id="changeStorage" class="btn icon-btn" data-tip="Change storage location">Change</button>
-          <button id="openSettings" class="btn icon-btn" data-tip="Currency & passcode">Settings</button>
-          <button id="openRecurring" class="btn icon-btn" data-tip="Recurring transactions">Recurring</button>
-          <button id="openTrash" class="btn icon-btn" data-tip="View deleted items">Trash</button>
+          <span id="storageBadge" class="chip" title="Where your data is saved">Storage: …</span>
+          <button id="changeStorage" class="btn icon-btn" title="Change storage">Change</button>
+          <button id="openSettings" class="btn icon-btn" title="Currency & Passcode">Settings</button>
+          <button id="openRecurring" class="btn icon-btn" title="Recurring transactions">Recurring</button>
+          <button id="openTrash" class="btn icon-btn" title="Trash bin">Trash</button>
         </div>
         <!-- Row 2 -->
         <div class="toolbar">
-          <button id="exportCsv" class="btn" data-tip="Download all transactions as CSV">Export CSV</button>
-          <button id="exportJson" class="btn" data-tip="Download everything as JSON">Export JSON</button>
-          <label class="btn" for="importFile" data-tip="Import CSV or JSON">Import…</label>
+          <button id="exportCsv" class="btn">Export CSV</button>
+          <button id="exportJson" class="btn">Export JSON</button>
+          <label class="btn" for="importFile" title="Import CSV or JSON">Import…</label>
           <input id="importFile" type="file" accept=".csv,.json,text/csv,application/json" class="sr-only" />
-          <button id="clearAll" class="btn danger" data-tip="Reset all app data">Reset</button>
+          <button id="clearAll" class="btn danger">Reset</button>
         </div>
-        <div class="actionsRedo">
-          <button id="undoBtn" class="btn" data-tip="Undo (Ctrl/Cmd+Z)">Undo</button>
-          <button id="redoBtn" class="btn" data-tip="Redo (Ctrl/Cmd+Y)">Redo</button>
-        </div>
+	<div class="actionsRedo">
+            <button id="undoBtn" class="btn" title="Undo (Ctrl+Z)">Undo</button>
+            <button id="redoBtn" class="btn" title="Redo (Ctrl+Y)">Redo</button>
+          </div>
       </div>
 
       <div class="filters">
@@ -210,10 +211,10 @@
           <input id="categoryFilter" type="text" list="cats" placeholder="All" />
           <datalist id="cats"></datalist>
         </div>
-        <br><br>
+	<br><br>
         <div class="row-center">
-          <span class="chip" data-tip="Display currency"><strong id="currLabel" style="margin-left:6px">USD</strong></span>
-          <button id="lockNow" class="btn" data-tip="Lock the app right now">Lock now</button>
+          <span class="chip">Currency: <strong id="currLabel" style="margin-left:6px">USD</strong></span>
+          <button id="lockNow" class="btn">Lock now</button>
         </div>
       </div>
 
@@ -223,12 +224,12 @@
         <div class="pill"><span class="label">Balance</span><span id="tBalance" class="val mono">0.00</span></div>
       </div>
       <div class="row-center" style="margin-top:10px">
-        <span id="paceChip" class="chip" data-tip="Spending pace for this month">Pace: —</span>
+        <span id="paceChip" class="chip" title="Spending pace for this month">Pace: —</span>
       </div>
     </div>
   </header>
 
-  <main class="wrap grid grid-2" style="padding-top:16px; padding-bottom:24px">
+  <main class="wrap grid grid-2">
     <!-- Transactions -->
     <section class="card">
       <div class="pad">
@@ -529,23 +530,12 @@
     const addDays = (iso, n)=> toISO(new Date(new Date(iso).getTime()+n*86400000));
     const addMonths = (iso, n)=>{ const d=new Date(iso); d.setUTCMonth(d.getUTCMonth()+n); return toISO(d); };
 
-    function toast(msg, kind='good'){
-      const host=$("#toasts");
-      const t=document.createElement("div");
-      t.className=`toast ${kind}`;
-      t.textContent=msg;
-      host.appendChild(t);
-      setTimeout(()=>{t.style.opacity=.9},10);
-      setTimeout(()=>{
-        t.style.opacity=0; t.style.transform='translateY(8px)';
-        t.addEventListener('transitionend',()=>t.remove(),{once:true});
-      }, 3000);
-    }
+    function toast(msg, kind='good'){ const host=$("#toasts"); const t=document.createElement("div"); t.className=`toast ${kind}`; t.textContent=msg; host.appendChild(t); setTimeout(()=>{t.style.opacity=.9},10); setTimeout(()=>{t.style.opacity=0; t.style.transform='translateY(8px)'; t.addEventListener('transitionend',()=>t.remove(),{once:true});},3200); }
 
     async function sha256Hex(str){ const data=new TextEncoder().encode(str); const hash=await crypto.subtle.digest('SHA-256',data); return [...new Uint8Array(hash)].map(b=>b.toString(16).padStart(2,'0')).join(''); }
 
     /* ===== Persistence ===== */
-    const LS_KEY = "BudgetBuddy.v7";
+    const LS_KEY = "BudgetBuddy.v7";  // bumped for new features
     const MODE_KEY = "mode";
 
     const idb = {
@@ -567,8 +557,8 @@
     const state={
       transactions:[],
       budgets:{},
-      recurring:[],
-      trash:[],
+      recurring:[],     // {id, type, amount, category, note, freq, nextDate}
+      trash:[],         // deleted transactions
       nextId:1,
       settings:{ currency:'USD', passcodeHash:null, autoLock:true }
     };
@@ -577,7 +567,7 @@
     const money=n=>fmtNum(n,currency());
     const maxId=()=>state.transactions.reduce((m,t)=>Math.max(m,Number(t.id)||0),0);
 
-    /* ===== Undo/Redo ===== */
+    /* ===== Undo/Redo (snapshot-based) ===== */
     const undoStack=[]; const redoStack=[];
     const snapshot = ()=> JSON.stringify({transactions:state.transactions, budgets:state.budgets, recurring:state.recurring, trash:state.trash, nextId:state.nextId});
     function pushUndo(){ undoStack.push(snapshot()); redoStack.length=0; }
@@ -619,7 +609,7 @@
         const tr=document.createElement("tr");
         tr.classList.add('swipeable');
         tr.setAttribute('data-id', r.id);
-        tr.innerHTML=`<td class="mono">${r.date}</td><td>${r.type}</td><td><span class="cat">${escapeHtml(r.category)}</span></td><td class="right mono">${r.type==="INCOME"?"+":"-"}${money(r.amount)}</td><td>${escapeHtml(r.note||"")}</td><td class="right"><button class="btn" data-edit="${r.id}" data-tip="Edit this transaction">Edit</button> <button class="btn danger" data-del="${r.id}" data-tip="Move to Trash">Delete</button></td>`;
+        tr.innerHTML=`<td class="mono">${r.date}</td><td>${r.type}</td><td><span class="cat">${escapeHtml(r.category)}</span></td><td class="right mono">${r.type==="INCOME"?"+":"-"}${money(r.amount)}</td><td>${escapeHtml(r.note||"")}</td><td class="right"><button class="btn" data-edit="${r.id}">Edit</button> <button class="btn danger" data-del="${r.id}">Delete</button></td>`;
         tb.appendChild(tr);
       }
       hookSwipeRows();
@@ -629,7 +619,7 @@
       for(const c of cats){
         const limit=state.budgets[c]||0; const spent=spentInMonth(c); const remaining=limit-spent; const red=remaining<0?"style='color:var(--warn)'":"";
         const tr=document.createElement("tr");
-        tr.innerHTML=`<td><span class="cat">${escapeHtml(c)}</span></td><td class="right mono">${money(limit)}</td><td class="right mono">${money(spent)}</td><td class="right mono" ${red}>${money(remaining)}</td><td class="right"><button class="btn" data-bud-edit="${encodeURIComponent(c)}" data-tip="Edit budget">Edit</button> <button class="btn danger" data-bud-del="${encodeURIComponent(c)}" data-tip="Delete budget">Delete</button></td>`;
+        tr.innerHTML=`<td><span class="cat">${escapeHtml(c)}</span></td><td class="right mono">${money(limit)}</td><td class="right mono">${money(spent)}</td><td class="right mono" ${red}>${money(remaining)}</td><td class="right"><button class="btn" data-bud-edit="${encodeURIComponent(c)}">Edit</button> <button class="btn danger" data-bud-del="${encodeURIComponent(c)}">Delete</button></td>`;
         budTb.appendChild(tr);
       }
       refreshCategoryDatalist();
@@ -647,12 +637,12 @@
     function lsSync(){ lsSave({...state,[MODE_KEY]:storageMode}) }
     async function persist(){ (storageMode==='file') ? await fileSave() : lsSync() }
 
-    /* ===== Transactions CRUD ===== */
+    /* ===== Transactions CRUD (push undo) ===== */
     function add(tx){ pushUndo(); const t={ id:state.nextId++, date:toISO(tx.date||todayISO()), amount:Math.abs(Number(tx.amount)||0), type:(String(tx.type||'EXPENSE').toUpperCase()==='INCOME'?'INCOME':'EXPENSE'), category:(tx.category||'General').toString(), note:(tx.note||'').toString() }; state.transactions.push(t); persist(); toast(`${t.type==='INCOME'?'Income':'Expense'} added`,'good'); return t; }
     function updateTx(id,patch){ pushUndo(); const t=state.transactions.find(x=>x.id===id); if(!t) return null; if(patch.amount!=null) t.amount=Math.abs(Number(patch.amount)||0); if(patch.type) t.type=(String(patch.type).toUpperCase()==='INCOME'?'INCOME':'EXPENSE'); if(patch.category!=null) t.category=String(patch.category); if(patch.date) t.date=toISO(patch.date); if(patch.note!=null) t.note=String(patch.note); persist(); toast('Transaction updated','good'); return t; }
     function removeTx(id){ pushUndo(); const i=state.transactions.findIndex(t=>t.id===id); if(i>=0){ const [deleted]=state.transactions.splice(i,1); state.trash.unshift({ ...deleted, deletedAt: Date.now() }); persist(); toast('Transaction deleted (moved to Trash)','good'); return true;} return false; }
 
-    /* ===== CSV/JSON ===== */
+    /* ===== CSV/JSON helpers ===== */
     const csvEscape=s=>{ const v=String(s??""); return /[",\n]/.test(v)?`"${v.replace(/"/g,'""')}"`:v; };
     function toCSV(rows){ const header="id,date,amount,type,category,note"; const body=rows.map(t=>[t.id,t.date,t.amount,t.type,csvEscape(t.category),csvEscape(t.note)].join(",")).join("\n"); return header+"\n"+body; }
     function parseCSV(text){ const lines=text.trim().split(/\r?\n/); const hdr=lines.shift()||""; if(!/id,date,amount,type,category,note/i.test(hdr)) throw new Error("CSV header must be id,date,amount,type,category,note"); const out=[]; for(const line of lines){ if(!line.trim()) continue; const cols=[]; let cur="",inQ=false; for(let i=0;i<line.length;i++){ const ch=line[i]; if(inQ){ if(ch==='"' && line[i+1]==='"'){ cur+='"'; i++; } else if(ch==='"') inQ=false; else cur+=ch; } else { if(ch===','){ cols.push(cur); cur="" } else if(ch==='"'){ inQ=true } else cur+=ch; } } cols.push(cur); const [idStr,dateStr,amountStr,type,category,note]=cols; out.push({ id:Number(idStr)||(maxId()+1+out.length), date:toISO(dateStr), amount:Math.abs(Number(amountStr)||0), type:(String(type).toUpperCase()==="INCOME"?"INCOME":"EXPENSE"), category:String(category||"General"), note:String(note||"") }); } return out; }
@@ -686,7 +676,7 @@
       const tb=$("#recTbody"); if(!tb) return; tb.innerHTML="";
       for(const r of state.recurring.sort((a,b)=>a.nextDate.localeCompare(b.nextDate))){
         const tr=document.createElement('tr');
-        tr.innerHTML=`<td class="mono">${r.nextDate||'—'}</td><td>${r.freq}</td><td>${r.type}</td><td><span class="cat">${escapeHtml(r.category)}</span></td><td class="right mono">${r.type==='INCOME'?'+':'-'}${money(r.amount)}</td><td>${escapeHtml(r.note||'')}</td><td class="right"><button class="btn" data-rec-edit="${r.id}" data-tip="Edit">Edit</button> <button class="btn danger" data-rec-del="${r.id}" data-tip="Delete">Delete</button></td>`;
+        tr.innerHTML=`<td class="mono">${r.nextDate||'—'}</td><td>${r.freq}</td><td>${r.type}</td><td><span class="cat">${escapeHtml(r.category)}</span></td><td class="right mono">${r.type==='INCOME'?'+':'-'}${money(r.amount)}</td><td>${escapeHtml(r.note||'')}</td><td class="right"><button class="btn" data-rec-edit="${r.id}">Edit</button> <button class="btn danger" data-rec-del="${r.id}">Delete</button></td>`;
         tb.appendChild(tr);
       }
     }
@@ -697,7 +687,7 @@
       for(const t of state.trash){
         const when=new Date(t.deletedAt||Date.now()).toLocaleString();
         const tr=document.createElement('tr');
-        tr.innerHTML=`<td>${when}</td><td class="mono">${t.date}</td><td>${t.type}</td><td><span class="cat">${escapeHtml(t.category)}</span></td><td class="right mono">${t.type==='INCOME'?'+':'-'}${money(t.amount)}</td><td>${escapeHtml(t.note||'')}</td><td class="right"><button class="btn" data-restore="${t.id}" data-tip="Restore">Restore</button></td>`;
+        tr.innerHTML=`<td>${when}</td><td class="mono">${t.date}</td><td>${t.type}</td><td><span class="cat">${escapeHtml(t.category)}</span></td><td class="right mono">${t.type==='INCOME'?'+':'-'}${money(t.amount)}</td><td>${escapeHtml(t.note||'')}</td><td class="right"><button class="btn" data-restore="${t.id}">Restore</button></td>`;
         tb.appendChild(tr);
       }
     }
@@ -710,8 +700,10 @@
         function onStart(e){ active=true; tr.classList.add('swiping'); startX=(e.touches?e.touches[0].clientX:e.clientX); }
         function onMove(e){ if(!active) return; const x=(e.touches?e.touches[0].clientX:e.clientX); dx=x-startX; tr.style.transform=`translateX(${dx}px)`; tr.classList.toggle('swipe-delete', dx<-40); tr.classList.toggle('swipe-edit', dx>40); }
         function onEnd(){ if(!active) return; active=false; tr.classList.remove('swiping'); tr.style.transition='transform .18s ease'; const id=Number(tr.getAttribute('data-id'));
-          if(dx<-80){ tr.style.transform='translateX(-120%)'; setTimeout(()=>{ removeTx(id); render(); },160);
-          } else if(dx>80){ tr.style.transform='translateX(120%)'; setTimeout(()=>{ const t=state.transactions.find(x=>x.id===id); if(!t) return; $("#editId").value=String(t.id); $("#editType").value=t.type; $("#editAmount").value=String(t.amount); $("#editCategory").value=t.category; $("#editDate").value=t.date; $("#editNote").value=t.note||""; $("#editDlg").showModal(); tr.style.transform=''; },160);
+          if(dx<-80){ // swipe left = delete
+            tr.style.transform='translateX(-120%)'; setTimeout(()=>{ removeTx(id); render(); },160);
+          } else if(dx>80){ // swipe right = edit
+            tr.style.transform='translateX(120%)'; setTimeout(()=>{ const t=state.transactions.find(x=>x.id===id); if(!t) return; $("#editId").value=String(t.id); $("#editType").value=t.type; $("#editAmount").value=String(t.amount); $("#editCategory").value=t.category; $("#editDate").value=t.date; $("#editNote").value=t.note||""; $("#editDlg").showModal(); tr.style.transform=''; },160);
           } else { tr.style.transform=''; }
           tr.classList.remove('swipe-delete','swipe-edit'); setTimeout(()=>{ tr.style.transition=''; },200);
           dx=0;
@@ -724,42 +716,6 @@
         tr.addEventListener('mouseup',onEnd);
         tr.addEventListener('mouseleave',onEnd);
       });
-    }
-
-    /* ===== Scroll lock while dialogs are open ===== */
-    let scrollYStore=0, openDialogs=0;
-    function lockBodyScroll(){
-      if(openDialogs===0){
-        scrollYStore = window.scrollY || document.documentElement.scrollTop;
-        document.body.classList.add('modal-open');
-        document.body.style.top = `-${scrollYStore}px`;
-      }
-      openDialogs++;
-    }
-    function unlockBodyScroll(){
-      openDialogs = Math.max(0, openDialogs-1);
-      if(openDialogs===0){
-        document.body.classList.remove('modal-open');
-        document.body.style.top = '';
-        window.scrollTo(0, scrollYStore);
-      }
-    }
-    function attachScrollLock(dlg){
-      dlg.addEventListener('close', unlockBodyScroll);
-      dlg.addEventListener('cancel', unlockBodyScroll);
-      // showModal is called in code; hook into open points:
-      const origShow = dlg.showModal.bind(dlg);
-      dlg.showModal = (...args)=>{ lockBodyScroll(); origShow(...args); };
-    }
-
-    // helper for lock info that auto-clears after 3s
-    function setLockInfo(msg, autoMs=3000){
-      const info=$("#lockInfo");
-      info.textContent = msg || '';
-      if(info._timer) clearTimeout(info._timer);
-      if(autoMs){
-        info._timer = setTimeout(()=>{ info.textContent=''; }, autoMs);
-      }
     }
 
     /* ===== Init & Lock ===== */
@@ -791,20 +747,13 @@
       // Process due recurring items at startup
       processRecurring();
 
-      // Install scroll lock on dialogs
-      ['editDlg','storageDlg','settingsDlg','lockDlg','recurringDlg','trashDlg'].forEach(id=> attachScrollLock(document.getElementById(id)));
-
       document.addEventListener('visibilitychange', ()=>{ if(document.hidden){ if(state.settings.passcodeHash && state.settings.autoLock){ localStorage.setItem('bb_should_lock','1'); } } else { const should=localStorage.getItem('bb_should_lock'); if(should==='1' && state.settings.passcodeHash){ localStorage.removeItem('bb_should_lock'); lockScreen(); } } });
-
-      // Init tooltips (after DOM ready)
-      initTooltips();
     }
 
     // Lock with chill-down & destructive delete after repeated failures
     const CHILLS = [15, 60, 300]; // seconds
     async function lockScreen(first=false){
-      const dlg=$("#lockDlg"); const input=$("#pinEntry");
-      setLockInfo('');
+      const dlg=$("#lockDlg"); const input=$("#pinEntry"); const info=$("#lockInfo");
       dlg.showModal(); await sleep(30); input.focus();
 
       function getState(){
@@ -826,6 +775,7 @@
       function resetAll(){ setState({attempts:0, chills:0, coolUntil:0, postChillAttempts:0}); }
 
       async function maybeWipe(){
+        // wipe data and local storage keys
         state.transactions=[]; state.budgets={}; state.recurring=[]; state.trash=[]; state.nextId=1;
         await persist(); render(); resetAll(); toast('All data wiped due to repeated failed passcode attempts','bad');
       }
@@ -834,18 +784,15 @@
         const st=getState();
         const now=Date.now();
         if(st.coolUntil && now<st.coolUntil){
-          const update=()=> {
+          const secs=Math.ceil((st.coolUntil-now)/1000);
+          info.textContent=`Locked. Try again in ${secs}s.`;
+          $("#unlockBtn").disabled=true;
+          input.disabled=true;
+          const iv=setInterval(()=>{
             const left=Math.ceil((st.coolUntil-Date.now())/1000);
-            if(left>0){
-              $("#unlockBtn").disabled=true; input.disabled=true;
-              setLockInfo(`Locked. Try again in ${left}s.`, 0);
-            } else {
-              clearInterval(iv); $("#unlockBtn").disabled=false; input.disabled=false; setLockInfo('');
-              input.focus();
-            }
-          };
-          const iv=setInterval(update,500);
-          update();
+            if(left>0){ info.textContent=`Locked. Try again in ${left}s.`; }
+            else { clearInterval(iv); $("#unlockBtn").disabled=false; input.disabled=false; info.textContent=''; input.focus(); }
+          },500);
           return true;
         }
         return false;
@@ -856,13 +803,14 @@
       return new Promise(res=>{
         const handler=async ()=>{
           const pin=input.value.trim(); input.value='';
+          // cooldown still?
           const still=await checkCooldown(); if(still) return;
 
           const st=getState();
           const hash=await sha256Hex(pin);
           if(hash===state.settings.passcodeHash){
-            dlg.close(); toast('Unlocked'); resetAll(); setLockInfo('');
-            input.removeEventListener('keydown',onEnter); $("#unlockBtn").removeEventListener('click',handler); return res(true);
+            dlg.close(); toast('Unlocked'); resetAll(); res(true);
+            input.removeEventListener('keydown',onEnter); $("#unlockBtn").removeEventListener('click',handler); return;
           }
 
           // wrong
@@ -872,16 +820,17 @@
               const chill=st.chills+1;
               const secs=CHILLS[st.chills];
               setState({attempts:0, chills:chill, coolUntil: Date.now()+secs*1000});
-              setLockInfo(`Too many attempts. Cooling down for ${secs}s.`, 0);
+              info.textContent=`Too many attempts. Cooling down for ${secs}s.`;
               await checkCooldown();
             } else {
               setState({attempts});
-              setLockInfo(`Wrong passcode. Attempts: ${attempts}/3 before cooldown.`);
+              info.textContent=`Wrong passcode. Attempts: ${attempts}/3 before cooldown.`;
             }
           } else {
+            // after 3 chills, allow 3 more attempts then wipe
             const n=st.postChillAttempts+1;
-            if(n>=3){ dlg.close(); await maybeWipe(); return res(false); }
-            else { setState({postChillAttempts:n}); setLockInfo(`Wrong. Final attempts: ${n}/3 before data wipe.`); }
+            if(n>=3){ dlg.close(); await maybeWipe(); res(false); }
+            else { setState({postChillAttempts:n}); info.textContent=`Wrong. Final attempts: ${n}/3 before data wipe.`; }
           }
           input.focus();
         };
@@ -939,14 +888,14 @@
     $("#pickBrowser").addEventListener("click", async ()=>{ storageMode='local'; await idb.set(MODE_KEY,storageMode); await idb.del('dataHandle'); fileHandle=null; lsSync(); $("#storageDlg").close(); renderStorageBadge(); toast("Using Browser Storage"); });
     $("#pickFile").addEventListener("click", async ()=>{ if(!('showSaveFilePicker' in window)){ toast('File picker not supported here','bad'); return; } try{ const handle=await window.showSaveFilePicker({ suggestedName:'budgetbuddy-data.json', types:[{ description:'JSON file', accept:{ 'application/json':['.json'] } }] }); fileHandle=handle; storageMode='file'; await idb.set('dataHandle',fileHandle); await idb.set(MODE_KEY,storageMode); const file=await fileHandle.getFile(); if((file.size||0)>0) await fileLoad(); else await fileSave(); $("#storageDlg").close(); renderStorageBadge(); render(); toast("Saving to your chosen file"); }catch(e){ if(!(e && e.name==='AbortError')) toast('Could not choose file','bad'); } });
 
-    $("#openSettings").addEventListener("click",()=>{ $("#currencySelect").value=state.settings.currency||'USD'; $("#customCurr").value=''; $("#autoLockToggle").checked=!!$("#autoLockToggle").checked; $("#settingsDlg").showModal(); });
+    $("#openSettings").addEventListener("click",()=>{ $("#currencySelect").value=state.settings.currency||'USD'; $("#customCurr").value=''; $("#autoLockToggle").checked=!!state.settings.autoLock; $("#settingsDlg").showModal(); });
     $("#saveCurrency").addEventListener("click", async ()=>{ const sel=$("#currencySelect").value; const custom=$("#customCurr").value.trim().toUpperCase(); state.settings.currency=custom||sel||'USD'; state.settings.autoLock=!!$("#autoLockToggle").checked; await persist(); $("#currLabel").textContent=state.settings.currency; $("#settingsDlg").close(); render(); toast('Settings saved'); });
     $("#closeSettings").addEventListener("click",()=>$("#settingsDlg").close());
     $("#savePin").addEventListener("click", async ()=>{ const a=$("#newPin").value.trim(); const b=$("#confirmPin").value.trim(); if(!/^\d{4,8}$/.test(a)){ toast('Passcode must be 4–8 digits','bad'); return; } if(a!==b){ toast('Passcodes do not match','bad'); return; } state.settings.passcodeHash=await sha256Hex(a); $("#newPin").value=$("#confirmPin").value=''; await persist(); toast('Passcode set'); });
     $("#clearPin").addEventListener("click", async ()=>{ state.settings.passcodeHash=null; await persist(); toast('Passcode removed'); });
     $("#lockNow").addEventListener("click", async ()=>{ if(!state.settings.passcodeHash){ toast('No passcode set (Settings)','bad'); return; } await lockScreen(); });
 
-    // Recurring dialog
+    // Recurring dialog handlers
     $("#openRecurring").addEventListener("click",()=>{ $("#recStart").value=todayISO(); $("#recurringDlg").showModal(); renderRecurringTable(); });
     $("#closeRecurring").addEventListener("click",()=>$("#recurringDlg").close());
     $("#recForm").addEventListener("submit",(e)=>{ e.preventDefault(); const r={ id: Date.now(), type:$("#recType").value, amount:Math.abs(Number($("#recAmount").value)||0), category:$("#recCategory").value.trim()||'General', note:$("#recNote").value.trim(), freq:$("#recFreq").value, nextDate: $("#recStart").value || todayISO() }; if(!r.amount){ toast('Amount required','bad'); return; } pushUndo(); state.recurring.push(r); persist(); render(); toast('Recurring added'); });
@@ -958,68 +907,6 @@
 
     if('serviceWorker' in navigator){ window.addEventListener('load', ()=>{ navigator.serviceWorker.register('./service-worker.js').catch(()=>{}); }); }
     init();
-
-    /* ===== Custom tooltip manager (auto-hide 3s) ===== */
-    function initTooltips(){
-      const tip = document.createElement('div');
-      tip.className = 'bb-tooltip';
-      document.body.appendChild(tip);
-      let hideTimer = null;
-      let currentAnchor = null;
-
-      function showTip(anchor){
-        const text = anchor.getAttribute('data-tip');
-        if(!text) return;
-        tip.textContent = text;
-        tip.style.left = '-9999px';
-        tip.style.top = '-9999px';
-        tip.classList.add('show');
-
-        const r = anchor.getBoundingClientRect();
-        const tr = tip.getBoundingClientRect();
-        let x = r.left + (r.width - tr.width)/2;
-        let y = r.top - tr.height - 8;
-        x = Math.max(8, Math.min(x, window.innerWidth - tr.width - 8));
-        if(y < 8){ y = r.bottom + 8; }
-        tip.style.left = `${Math.round(x)}px`;
-        tip.style.top = `${Math.round(y)}px`;
-
-        if(hideTimer) clearTimeout(hideTimer);
-        hideTimer = setTimeout(hide, 3000);
-        currentAnchor = anchor;
-        anchor.setAttribute('aria-describedby','bbtip');
-      }
-      function hide(){
-        tip.classList.remove('show');
-        if(hideTimer) clearTimeout(hideTimer);
-        hideTimer = null;
-        if(currentAnchor){ currentAnchor.removeAttribute('aria-describedby'); currentAnchor = null; }
-      }
-      tip.id = 'bbtip';
-
-      function onEnter(e){
-        const el = e.currentTarget;
-        showTip(el);
-      }
-      function onLeave(){
-        hide();
-      }
-      function onFocus(e){ showTip(e.currentTarget); }
-      function onBlur(){ hide(); }
-
-      const anchors = [...document.querySelectorAll('[data-tip]')];
-      anchors.forEach(a=>{
-        a.addEventListener('mouseenter', onEnter);
-        a.addEventListener('mouseleave', onLeave);
-        a.addEventListener('focus', onFocus);
-        a.addEventListener('blur', onBlur);
-        a.addEventListener('touchstart', (e)=>{ showTip(e.currentTarget); }, {passive:true});
-        a.addEventListener('touchend', hide, {passive:true});
-      });
-
-      window.addEventListener('scroll', ()=>{ if(currentAnchor) hide(); }, {passive:true});
-      window.addEventListener('resize', ()=>{ if(currentAnchor) hide(); });
-    }
   })();
   </script>
 </body>
