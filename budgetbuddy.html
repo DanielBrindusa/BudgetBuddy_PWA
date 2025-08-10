@@ -53,7 +53,7 @@
     }
     .wrap{ max-width:1100px; margin:0 auto; padding:14px 16px; }
 
-    /* Header layout (fixed) */
+    /* Header layout (two neat rows) */
     .brand{ display:flex; flex-direction:column; align-items:flex-start; gap:12px; margin:0 0 12px 0; }
     .brand-top{ display:flex; align-items:center; flex-wrap:wrap; gap:10px; }
     .toolbar{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:flex-start; }
@@ -114,10 +114,16 @@
     .mono{ font-variant-numeric: tabular-nums }
     .cat{ padding:2px 10px; border-radius:999px; background: color-mix(in oklab, var(--surface) 65%, transparent); }
 
+    /* Swipe affordance */
+    tr.swipeable { touch-action: pan-y; }
+    tr.swiping td { transition: none !important; }
+    tr.swipe-delete td { background: color-mix(in oklab, var(--warn) 20%, transparent); }
+    tr.swipe-edit td { background: color-mix(in oklab, var(--primary) 20%, transparent); }
+
     /* ======= Dialogs ======= */
     dialog{
       border:none; border-radius: var(--radius); background: color-mix(in oklab, var(--surface) 90%, transparent);
-      color:var(--text); box-shadow: var(--shadow); border:1px solid var(--outline); width:min(620px, calc(100% - 32px));
+      color:var(--text); box-shadow: var(--shadow); border:1px solid var(--outline); width:min(720px, calc(100% - 32px));
       animation: pop .18s ease-out forwards; transform-origin: center;
       backdrop-filter: blur(var(--blur));
     }
@@ -149,22 +155,27 @@
   <header>
     <div class="wrap">
       <div class="brand">
-        <!-- Row 1: logo + title + storage + settings -->
+        <!-- Row 1 -->
         <div class="brand-top">
           <div class="logo" aria-hidden="true"></div>
           <h1>BudgetBuddy</h1>
           <span id="storageBadge" class="chip" title="Where your data is saved">Storage: …</span>
           <button id="changeStorage" class="btn icon-btn" title="Change storage">Change</button>
           <button id="openSettings" class="btn icon-btn" title="Currency & Passcode">Settings</button>
+          <button id="openRecurring" class="btn icon-btn" title="Recurring transactions">Recurring</button>
+          <button id="openTrash" class="btn icon-btn" title="Trash bin">Trash</button>
         </div>
-
-        <!-- Row 2: actions (left aligned) -->
+        <!-- Row 2 -->
         <div class="toolbar">
           <button id="exportCsv" class="btn">Export CSV</button>
           <button id="exportJson" class="btn">Export JSON</button>
           <label class="btn" for="importFile" title="Import CSV or JSON">Import…</label>
           <input id="importFile" type="file" accept=".csv,.json,text/csv,application/json" class="sr-only" />
           <button id="clearAll" class="btn danger">Reset</button>
+          <div style="margin-left:auto; display:flex; gap:8px">
+            <button id="undoBtn" class="btn" title="Undo (Ctrl+Z)">Undo</button>
+            <button id="redoBtn" class="btn" title="Redo (Ctrl+Y)">Redo</button>
+          </div>
         </div>
       </div>
 
@@ -192,6 +203,9 @@
         <div class="pill income"><span class="label">Income</span><span id="tIncome" class="val mono">0.00</span></div>
         <div class="pill expense"><span class="label">Expense</span><span id="tExpense" class="val mono">0.00</span></div>
         <div class="pill"><span class="label">Balance</span><span id="tBalance" class="val mono">0.00</span></div>
+      </div>
+      <div class="row-center" style="margin-top:10px">
+        <span id="paceChip" class="chip" title="Spending pace for this month">Pace: —</span>
       </div>
     </div>
   </header>
@@ -397,10 +411,84 @@
   <dialog id="lockDlg" aria-modal="true">
     <div class="dlg-head">Enter passcode</div>
     <div class="dlg-body">
+      <div id="lockInfo" class="hint" style="margin-bottom:8px"></div>
       <input id="pinEntry" type="password" inputmode="numeric" pattern="\\d*" minlength="4" maxlength="8" placeholder="••••" style="width:200px">
     </div>
     <div class="dlg-foot">
       <button class="btn primary" id="unlockBtn">Unlock</button>
+    </div>
+  </dialog>
+
+  <!-- Recurring transactions -->
+  <dialog id="recurringDlg" aria-modal="true">
+    <div class="dlg-head">Recurring transactions</div>
+    <div class="dlg-body">
+      <form id="recForm" class="row" autocomplete="off">
+        <div style="min-width:130px">
+          <label for="recType">Type</label>
+          <select id="recType"><option>EXPENSE</option><option>INCOME</option></select>
+        </div>
+        <div>
+          <label for="recAmount">Amount</label>
+          <input id="recAmount" type="number" step="0.01" placeholder="0.00" required />
+        </div>
+        <div>
+          <label for="recCategory">Category</label>
+          <input id="recCategory" type="text" list="cats" placeholder="Rent / Salary" required />
+        </div>
+        <div>
+          <label for="recStart">Start date</label>
+          <input id="recStart" type="date" />
+        </div>
+        <div>
+          <label for="recFreq">Frequency</label>
+          <select id="recFreq">
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly" selected>Monthly</option>
+          </select>
+        </div>
+        <div style="flex:1 1 100%">
+          <label for="recNote">Note</label>
+          <input id="recNote" type="text" placeholder="(optional)" />
+        </div>
+        <div class="row" style="justify-content:flex-end; gap:8px; flex:1 1 100%">
+          <button class="btn primary" type="submit">Add recurring</button>
+        </div>
+      </form>
+
+      <div class="table-wrap" style="margin-top:10px">
+        <table aria-label="Recurring">
+          <thead>
+            <tr><th>Next</th><th>Freq</th><th>Type</th><th>Category</th><th class="right">Amount</th><th>Note</th><th class="right">Actions</th></tr>
+          </thead>
+          <tbody id="recTbody"></tbody>
+        </table>
+      </div>
+      <p class="hint">Due items auto‑post on open and show a reminder toast.</p>
+    </div>
+    <div class="dlg-foot">
+      <button class="btn" id="closeRecurring">Close</button>
+    </div>
+  </dialog>
+
+  <!-- Trash bin -->
+  <dialog id="trashDlg" aria-modal="true">
+    <div class="dlg-head">Trash bin</div>
+    <div class="dlg-body">
+      <div class="table-wrap">
+        <table aria-label="Trash">
+          <thead>
+            <tr><th>Deleted</th><th>Date</th><th>Type</th><th>Category</th><th class="right">Amount</th><th>Note</th><th class="right">Actions</th></tr>
+          </thead>
+          <tbody id="trashTbody"></tbody>
+        </table>
+      </div>
+      <p class="hint">Items stay here until you purge them.</p>
+    </div>
+    <div class="dlg-foot">
+      <button class="btn danger" id="purgeTrash">Purge all</button>
+      <button class="btn" id="closeTrash">Close</button>
     </div>
   </dialog>
 
@@ -420,11 +508,15 @@
     const monthBounds = (yyyyMm) => { const [y,m] = (yyyyMm || todayISO().slice(0,7)).split("-").map(Number); const start = new Date(Date.UTC(y, m-1, 1)); const end = new Date(Date.UTC(y, m, 0)); return { start: start.toISOString().slice(0,10), end: end.toISOString().slice(0,10) }; };
     const escapeHtml = s => String(s).replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m]));
     const sleep = ms => new Promise(r => setTimeout(r, ms));
-    function toast(msg, kind='good'){ const host=$("#toasts"); const t=document.createElement("div"); t.className=`toast ${kind}`; t.textContent=msg; host.appendChild(t); setTimeout(()=>{t.style.opacity=.9},10); setTimeout(()=>{t.style.opacity=0; t.style.transform='translateY(8px)'; t.addEventListener('transitionend',()=>t.remove(),{once:true});},2800); }
+    const addDays = (iso, n)=> toISO(new Date(new Date(iso).getTime()+n*86400000));
+    const addMonths = (iso, n)=>{ const d=new Date(iso); d.setUTCMonth(d.getUTCMonth()+n); return toISO(d); };
+
+    function toast(msg, kind='good'){ const host=$("#toasts"); const t=document.createElement("div"); t.className=`toast ${kind}`; t.textContent=msg; host.appendChild(t); setTimeout(()=>{t.style.opacity=.9},10); setTimeout(()=>{t.style.opacity=0; t.style.transform='translateY(8px)'; t.addEventListener('transitionend',()=>t.remove(),{once:true});},3200); }
+
     async function sha256Hex(str){ const data=new TextEncoder().encode(str); const hash=await crypto.subtle.digest('SHA-256',data); return [...new Uint8Array(hash)].map(b=>b.toString(16).padStart(2,'0')).join(''); }
 
     /* ===== Persistence ===== */
-    const LS_KEY = "BudgetBuddy.v6";
+    const LS_KEY = "BudgetBuddy.v7";  // bumped for new features
     const MODE_KEY = "mode";
 
     const idb = {
@@ -443,15 +535,48 @@
     async function verifyPermission(handle,mode='readwrite'){ const opt={mode}; if((await handle.queryPermission(opt))==='granted')return true; if((await handle.requestPermission(opt))==='granted')return true; return false; }
 
     /* ===== State ===== */
-    const state={ transactions:[], budgets:{}, nextId:1, settings:{ currency:'USD', passcodeHash:null, autoLock:true } };
+    const state={
+      transactions:[],
+      budgets:{},
+      recurring:[],     // {id, type, amount, category, note, freq, nextDate}
+      trash:[],         // deleted transactions
+      nextId:1,
+      settings:{ currency:'USD', passcodeHash:null, autoLock:true }
+    };
+
     const currency=()=>state.settings.currency||'USD';
     const money=n=>fmtNum(n,currency());
     const maxId=()=>state.transactions.reduce((m,t)=>Math.max(m,Number(t.id)||0),0);
 
+    /* ===== Undo/Redo (snapshot-based) ===== */
+    const undoStack=[]; const redoStack=[];
+    const snapshot = ()=> JSON.stringify({transactions:state.transactions, budgets:state.budgets, recurring:state.recurring, trash:state.trash, nextId:state.nextId});
+    function pushUndo(){ undoStack.push(snapshot()); redoStack.length=0; }
+    function applySnapshot(json){ const s=JSON.parse(json); state.transactions=s.transactions||[]; state.budgets=s.budgets||{}; state.recurring=s.recurring||[]; state.trash=s.trash||[]; state.nextId=s.nextId||1; persist(); render(); }
+    $("#undoBtn").addEventListener("click",()=>{ if(!undoStack.length){ toast('Nothing to undo','bad'); return; } redoStack.push(snapshot()); applySnapshot(undoStack.pop()); });
+    $("#redoBtn").addEventListener("click",()=>{ if(!redoStack.length){ toast('Nothing to redo','bad'); return; } undoStack.push(snapshot()); applySnapshot(redoStack.pop()); });
+    document.addEventListener('keydown',e=>{ if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='z'){ e.preventDefault(); $("#undoBtn").click(); } if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='y'){ e.preventDefault(); $("#redoBtn").click(); } });
+
+    /* ===== Core helpers ===== */
     function computeTotals(rows){ const inc=rows.filter(t=>t.type==='INCOME').reduce((s,t)=>s+t.amount,0); const exp=rows.filter(t=>t.type==='EXPENSE').reduce((s,t)=>s+t.amount,0); return {income:inc, expense:exp, balance:inc-exp}; }
     function renderStorageBadge(){ $("#storageBadge").textContent = storageMode==='file' ? 'Storage: File' : 'Storage: Browser'; $("#currLabel").textContent=currency(); }
-    function refreshCategoryDatalist(){ const dl=$("#cats"); dl.innerHTML=""; const cats=[...new Set(state.transactions.map(t=>t.category).concat(Object.keys(state.budgets)))].filter(Boolean).sort(); for(const c of cats){ const o=document.createElement("option"); o.value=c; dl.appendChild(o);} }
+    function refreshCategoryDatalist(){ const dl=$("#cats"); dl.innerHTML=""; const cats=[...new Set(state.transactions.map(t=>t.category).concat(Object.keys(state.budgets)).concat(state.recurring.map(r=>r.category)))].filter(Boolean).sort(); for(const c of cats){ const o=document.createElement("option"); o.value=c; dl.appendChild(o);} }
     function listFiltered(){ const yyyyMm=$("#month").value || todayISO().slice(0,7); const {start,end}=monthBounds(yyyyMm); const type=$("#typeFilter").value; const cat=($("#categoryFilter").value||"").trim().toLowerCase(); return state.transactions.filter(t=>t.date>=start && t.date<=end).filter(t=>!type || t.type===type).filter(t=>!cat || t.category.toLowerCase()===cat).sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id); }
+
+    function spendingPace(){
+      const yyyyMm=$("#month").value || todayISO().slice(0,7);
+      const {start,end}=monthBounds(yyyyMm);
+      const now=new Date().toISOString().slice(0,10);
+      const daysInMonth = Number(end.slice(-2));
+      const day = Math.min(daysInMonth, Number(now.slice(-2)));
+      const exp = state.transactions.filter(t=>t.type==='EXPENSE' && t.date>=start && t.date<=end).reduce((s,t)=>s+t.amount,0);
+      const totalBudget = Object.values(state.budgets).reduce((s,v)=>s+Number(v||0),0);
+      if(totalBudget<=0){ $("#paceChip").textContent="Pace: set budgets to track"; return; }
+      const expected = totalBudget * (day/daysInMonth);
+      const diff = exp - expected;
+      const pct = Math.abs(expected? (diff/expected*100):0);
+      $("#paceChip").textContent = diff>0 ? `Pace: over by ${money(diff)} (${pct.toFixed(0)}%)` : `Pace: under by ${money(-diff)} (${pct.toFixed(0)}%)`;
+    }
 
     function render(){
       const rows=listFiltered();
@@ -463,9 +588,12 @@
       const tb=$("#txTbody"); tb.innerHTML="";
       for(const r of rows){
         const tr=document.createElement("tr");
+        tr.classList.add('swipeable');
+        tr.setAttribute('data-id', r.id);
         tr.innerHTML=`<td class="mono">${r.date}</td><td>${r.type}</td><td><span class="cat">${escapeHtml(r.category)}</span></td><td class="right mono">${r.type==="INCOME"?"+":"-"}${money(r.amount)}</td><td>${escapeHtml(r.note||"")}</td><td class="right"><button class="btn" data-edit="${r.id}">Edit</button> <button class="btn danger" data-del="${r.id}">Delete</button></td>`;
         tb.appendChild(tr);
       }
+      hookSwipeRows();
 
       const budTb=$("#budTbody"); budTb.innerHTML="";
       const cats=Object.keys(state.budgets).sort((a,b)=>a.localeCompare(b));
@@ -477,22 +605,25 @@
       }
       refreshCategoryDatalist();
       drawCategoryChart();
+      spendingPace();
+      renderRecurringTable();
     }
     function spentInMonth(category){ const yyyyMm=$("#month").value || todayISO().slice(0,7); const {start,end}=monthBounds(yyyyMm); return state.transactions.filter(t=>t.type==="EXPENSE" && t.category===category && t.date>=start && t.date<=end).reduce((s,t)=>s+t.amount,0); }
 
     async function fileSave(){ if(!fileHandle) return; try{ const ok=await verifyPermission(fileHandle,'readwrite'); if(!ok) throw new Error('Permission denied'); const w=await fileHandle.createWritable(); await w.write(new Blob([JSON.stringify(state,null,2)],{type:'application/json'})); await w.close(); }catch(e){ console.warn('file save failed',e); toast('Saving failed — switched to Browser Storage','bad'); storageMode='local'; await idb.set(MODE_KEY,storageMode); await idb.del('dataHandle'); fileHandle=null; lsSave({...state,[MODE_KEY]:storageMode}); renderStorageBadge(); } }
-    async function fileLoad(){ try{ const ok=await verifyPermission(fileHandle,'read'); if(!ok) return false; const text=await (await fileHandle.getFile()).text(); const obj=JSON.parse(text); if(!Array.isArray(obj.transactions)||typeof obj.budgets!=='object'||typeof obj.settings!=='object') return false;
-      state.transactions=obj.transactions.map(t=>({ id:Number(t.id), date:toISO(t.date), amount:Math.abs(Number(t.amount)||0), type:(String(t.type).toUpperCase()==='INCOME'?'INCOME':'EXPENSE'), category:String(t.category||'General'), note:String(t.note||'') }));
-      state.budgets=obj.budgets||{}; state.settings={ currency:obj.settings.currency||'USD', passcodeHash:obj.settings.passcodeHash||null, autoLock: !!obj.settings.autoLock }; state.nextId=Number.isFinite(obj.nextId)?obj.nextId:(maxId()+1); return true; }catch{ return false } }
+    async function fileLoad(){ try{ const ok=await verifyPermission(fileHandle,'read'); if(!ok) return false; const text=await (await fileHandle.getFile()).text(); const obj=JSON.parse(text);
+      state.transactions=(obj.transactions||[]).map(t=>({ id:Number(t.id), date:toISO(t.date), amount:Math.abs(Number(t.amount)||0), type:(String(t.type).toUpperCase()==='INCOME'?'INCOME':'EXPENSE'), category:String(t.category||'General'), note:String(t.note||'') }));
+      state.budgets=obj.budgets||{}; state.settings={ currency:obj.settings?.currency||'USD', passcodeHash:obj.settings?.passcodeHash||null, autoLock: !!obj.settings?.autoLock };
+      state.recurring=obj.recurring||[]; state.trash=obj.trash||[]; state.nextId=Number.isFinite(obj.nextId)?obj.nextId:(maxId()+1); return true; }catch{ return false } }
     function lsSync(){ lsSave({...state,[MODE_KEY]:storageMode}) }
     async function persist(){ (storageMode==='file') ? await fileSave() : lsSync() }
 
-    function add(tx){ const t={ id:state.nextId++, date:toISO(tx.date||todayISO()), amount:Math.abs(Number(tx.amount)||0), type:(String(tx.type||'EXPENSE').toUpperCase()==='INCOME'?'INCOME':'EXPENSE'), category:(tx.category||'General').toString(), note:(tx.note||'').toString() }; state.transactions.push(t); persist(); toast(`${t.type==='INCOME'?'Income':'Expense'} added`,'good'); return t; }
-    function updateTx(id,patch){ const t=state.transactions.find(x=>x.id===id); if(!t) return null; if(patch.amount!=null) t.amount=Math.abs(Number(patch.amount)||0); if(patch.type) t.type=(String(patch.type).toUpperCase()==='INCOME'?'INCOME':'EXPENSE'); if(patch.category!=null) t.category=String(patch.category); if(patch.date) t.date=toISO(patch.date); if(patch.note!=null) t.note=String(patch.note); persist(); toast('Transaction updated','good'); return t; }
-    function removeTx(id){ const i=state.transactions.findIndex(t=>t.id===id); if(i>=0){ state.transactions.splice(i,1); persist(); toast('Transaction deleted','good'); return true;} return false; }
-    function setBudget(cat,limit){ if(!cat) return; state.budgets[String(cat)]=Math.max(0,Number(limit)||0); persist(); toast('Budget saved','good'); }
-    function deleteBudget(cat){ delete state.budgets[cat]; persist(); toast('Budget removed','good'); }
+    /* ===== Transactions CRUD (push undo) ===== */
+    function add(tx){ pushUndo(); const t={ id:state.nextId++, date:toISO(tx.date||todayISO()), amount:Math.abs(Number(tx.amount)||0), type:(String(tx.type||'EXPENSE').toUpperCase()==='INCOME'?'INCOME':'EXPENSE'), category:(tx.category||'General').toString(), note:(tx.note||'').toString() }; state.transactions.push(t); persist(); toast(`${t.type==='INCOME'?'Income':'Expense'} added`,'good'); return t; }
+    function updateTx(id,patch){ pushUndo(); const t=state.transactions.find(x=>x.id===id); if(!t) return null; if(patch.amount!=null) t.amount=Math.abs(Number(patch.amount)||0); if(patch.type) t.type=(String(patch.type).toUpperCase()==='INCOME'?'INCOME':'EXPENSE'); if(patch.category!=null) t.category=String(patch.category); if(patch.date) t.date=toISO(patch.date); if(patch.note!=null) t.note=String(patch.note); persist(); toast('Transaction updated','good'); return t; }
+    function removeTx(id){ pushUndo(); const i=state.transactions.findIndex(t=>t.id===id); if(i>=0){ const [deleted]=state.transactions.splice(i,1); state.trash.unshift({ ...deleted, deletedAt: Date.now() }); persist(); toast('Transaction deleted (moved to Trash)','good'); return true;} return false; }
 
+    /* ===== CSV/JSON helpers ===== */
     const csvEscape=s=>{ const v=String(s??""); return /[",\n]/.test(v)?`"${v.replace(/"/g,'""')}"`:v; };
     function toCSV(rows){ const header="id,date,amount,type,category,note"; const body=rows.map(t=>[t.id,t.date,t.amount,t.type,csvEscape(t.category),csvEscape(t.note)].join(",")).join("\n"); return header+"\n"+body; }
     function parseCSV(text){ const lines=text.trim().split(/\r?\n/); const hdr=lines.shift()||""; if(!/id,date,amount,type,category,note/i.test(hdr)) throw new Error("CSV header must be id,date,amount,type,category,note"); const out=[]; for(const line of lines){ if(!line.trim()) continue; const cols=[]; let cur="",inQ=false; for(let i=0;i<line.length;i++){ const ch=line[i]; if(inQ){ if(ch==='"' && line[i+1]==='"'){ cur+='"'; i++; } else if(ch==='"') inQ=false; else cur+=ch; } else { if(ch===','){ cols.push(cur); cur="" } else if(ch==='"'){ inQ=true } else cur+=ch; } } cols.push(cur); const [idStr,dateStr,amountStr,type,category,note]=cols; out.push({ id:Number(idStr)||(maxId()+1+out.length), date:toISO(dateStr), amount:Math.abs(Number(amountStr)||0), type:(String(type).toUpperCase()==="INCOME"?"INCOME":"EXPENSE"), category:String(category||"General"), note:String(note||"") }); } return out; }
@@ -504,6 +635,70 @@
     function drawCategoryChart(){ const canvas=$("#catChart"); const ctx=canvas.getContext('2d'); const rect=canvas.getBoundingClientRect(); const dpr=window.devicePixelRatio||1; canvas.width=Math.floor(rect.width*dpr); canvas.height=Math.floor(220*dpr); ctx.scale(dpr,dpr); const {labels,values}=calcCategoryData(); ctx.clearRect(0,0,canvas.width,canvas.height); const pad={l:14,r:10,t:10,b:36}; const w=rect.width-pad.l-pad.r; const h=220-pad.t-pad.b; ctx.strokeStyle='rgba(255,255,255,0.12)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(pad.l,pad.t); ctx.lineTo(pad.l,pad.t+h); ctx.lineTo(pad.l+w,pad.t+h); ctx.stroke(); if(values.length===0){ ctx.fillStyle='rgba(255,255,255,0.55)'; ctx.fillText('No expenses this month yet', pad.l+8, pad.t+h/2); return; } const max=Math.max(...values); const barW=Math.max(18, w/Math.max(1, values.length*1.6)); const gap=Math.min(20,(w-barW*values.length)/Math.max(1,values.length-1)); const start=performance.now(), duration=400; cancelAnimationFrame(chartAnim); function frame(now){ const t=Math.min(1,(now-start)/duration); const e=t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2; ctx.clearRect(0,0,canvas.width,canvas.height); ctx.strokeStyle='rgba(255,255,255,0.12)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(pad.l,pad.t); ctx.lineTo(pad.l,pad.t+h); ctx.lineTo(pad.l+w,pad.t+h); ctx.stroke(); for(let i=0;i<values.length;i++){ const x=pad.l+i*(barW+gap); const val=values[i]; const bh=(val/max)*h*e; const grd=ctx.createLinearGradient(x,pad.t+h,x,pad.t+h-bh); grd.addColorStop(0,'rgba(93,211,161,0.25)'); grd.addColorStop(1,'rgba(93,211,161,0.85)'); ctx.fillStyle=grd; ctx.fillRect(x,pad.t+h-bh,barW,bh); ctx.fillStyle='rgba(255,255,255,0.8)'; ctx.font='12px system-ui, Segoe UI, Roboto'; const lbl=labels[i].length>10?labels[i].slice(0,10)+'…':labels[i]; ctx.fillText(lbl,x,pad.t+h+14); ctx.fillStyle='rgba(255,255,255,0.7)'; ctx.font='11px system-ui, Segoe UI, Roboto'; ctx.fillText(money(val), x, pad.t+h-bh-6); } if(t<1) chartAnim=requestAnimationFrame(frame); } chartAnim=requestAnimationFrame(frame); }
     window.addEventListener('resize', drawCategoryChart);
 
+    /* ===== Recurring ===== */
+    function nextAfter(freq, iso){
+      if(freq==='daily') return addDays(iso,1);
+      if(freq==='weekly') return addDays(iso,7);
+      return addMonths(iso,1);
+    }
+    function processRecurring(){
+      const today=todayISO();
+      let posted=0;
+      for(const r of state.recurring){
+        while(r.nextDate && r.nextDate<=today){
+          add({ type:r.type, amount:r.amount, category:r.category, date:r.nextDate, note:r.note||'(recurring)' });
+          r.nextDate = nextAfter(r.freq, r.nextDate);
+          posted++;
+        }
+      }
+      if(posted>0){ persist(); render(); toast(`Auto‑posted ${posted} recurring item${posted>1?'s':''}`); }
+    }
+    function renderRecurringTable(){
+      const tb=$("#recTbody"); if(!tb) return; tb.innerHTML="";
+      for(const r of state.recurring.sort((a,b)=>a.nextDate.localeCompare(b.nextDate))){
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td class="mono">${r.nextDate||'—'}</td><td>${r.freq}</td><td>${r.type}</td><td><span class="cat">${escapeHtml(r.category)}</span></td><td class="right mono">${r.type==='INCOME'?'+':'-'}${money(r.amount)}</td><td>${escapeHtml(r.note||'')}</td><td class="right"><button class="btn" data-rec-edit="${r.id}">Edit</button> <button class="btn danger" data-rec-del="${r.id}">Delete</button></td>`;
+        tb.appendChild(tr);
+      }
+    }
+
+    /* ===== Trash ===== */
+    function renderTrash(){
+      const tb=$("#trashTbody"); tb.innerHTML="";
+      for(const t of state.trash){
+        const when=new Date(t.deletedAt||Date.now()).toLocaleString();
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td>${when}</td><td class="mono">${t.date}</td><td>${t.type}</td><td><span class="cat">${escapeHtml(t.category)}</span></td><td class="right mono">${t.type==='INCOME'?'+':'-'}${money(t.amount)}</td><td>${escapeHtml(t.note||'')}</td><td class="right"><button class="btn" data-restore="${t.id}">Restore</button></td>`;
+        tb.appendChild(tr);
+      }
+    }
+
+    /* ===== Swipe actions (mobile) ===== */
+    function hookSwipeRows(){
+      const rows=[...document.querySelectorAll('#txTbody tr.swipeable')];
+      rows.forEach(tr=>{
+        let startX=0, dx=0, active=false;
+        function onStart(e){ active=true; tr.classList.add('swiping'); startX=(e.touches?e.touches[0].clientX:e.clientX); }
+        function onMove(e){ if(!active) return; const x=(e.touches?e.touches[0].clientX:e.clientX); dx=x-startX; tr.style.transform=`translateX(${dx}px)`; tr.classList.toggle('swipe-delete', dx<-40); tr.classList.toggle('swipe-edit', dx>40); }
+        function onEnd(){ if(!active) return; active=false; tr.classList.remove('swiping'); tr.style.transition='transform .18s ease'; const id=Number(tr.getAttribute('data-id'));
+          if(dx<-80){ // swipe left = delete
+            tr.style.transform='translateX(-120%)'; setTimeout(()=>{ removeTx(id); render(); },160);
+          } else if(dx>80){ // swipe right = edit
+            tr.style.transform='translateX(120%)'; setTimeout(()=>{ const t=state.transactions.find(x=>x.id===id); if(!t) return; $("#editId").value=String(t.id); $("#editType").value=t.type; $("#editAmount").value=String(t.amount); $("#editCategory").value=t.category; $("#editDate").value=t.date; $("#editNote").value=t.note||""; $("#editDlg").showModal(); tr.style.transform=''; },160);
+          } else { tr.style.transform=''; }
+          tr.classList.remove('swipe-delete','swipe-edit'); setTimeout(()=>{ tr.style.transition=''; },200);
+          dx=0;
+        }
+        tr.addEventListener('touchstart',onStart,{passive:true});
+        tr.addEventListener('touchmove',onMove,{passive:true});
+        tr.addEventListener('touchend',onEnd);
+        tr.addEventListener('mousedown',onStart);
+        tr.addEventListener('mousemove',onMove);
+        tr.addEventListener('mouseup',onEnd);
+        tr.addEventListener('mouseleave',onEnd);
+      });
+    }
+
     /* ===== Init & Lock ===== */
     async function init(){
       $("#month").value=todayISO().slice(0,7); $("#txDate").value=todayISO();
@@ -513,24 +708,113 @@
 
       let loaded=false;
       if(storageMode==='file' && fileHandle){ loaded=await fileLoad(); if(!loaded){ storageMode='local'; await idb.set(MODE_KEY,'local'); await idb.del('dataHandle'); fileHandle=null; } }
-      if(!loaded && ls){ state.transactions=Array.isArray(ls.transactions)?ls.transactions:[]; state.budgets=ls.budgets&&typeof ls.budgets==="object"?ls.budgets:{}; state.settings=ls.settings&&typeof ls.settings==="object"?{...state.settings,...ls.settings}:state.settings; state.nextId=Number.isFinite(ls.nextId)?ls.nextId:(maxId()+1); }
+      if(!loaded && ls){
+        state.transactions=Array.isArray(ls.transactions)?ls.transactions:[]; 
+        state.budgets=ls.budgets&&typeof ls.budgets==="object"?ls.budgets:{}; 
+        state.recurring=Array.isArray(ls.recurring)?ls.recurring:[]; 
+        state.trash=Array.isArray(ls.trash)?ls.trash:[]; 
+        state.settings=ls.settings&&typeof ls.settings==="object"?{...state.settings,...ls.settings}:state.settings; 
+        state.nextId=Number.isFinite(ls.nextId)?ls.nextId:(maxId()+1);
+      }
 
       render(); renderStorageBadge();
       const firstTime=!storedMode && state.transactions.length===0 && Object.keys(state.budgets).length===0; if(firstTime) $("#storageDlg").showModal();
-      if(state.settings.passcodeHash) await lockScreen();
+      if(state.settings.passcodeHash) await lockScreen(true);
 
       $("#currencySelect").value=state.settings.currency || 'USD';
       $("#currLabel").textContent=currency();
       $("#autoLockToggle").checked=!!state.settings.autoLock;
 
+      // Process due recurring items at startup
+      processRecurring();
+
       document.addEventListener('visibilitychange', ()=>{ if(document.hidden){ if(state.settings.passcodeHash && state.settings.autoLock){ localStorage.setItem('bb_should_lock','1'); } } else { const should=localStorage.getItem('bb_should_lock'); if(should==='1' && state.settings.passcodeHash){ localStorage.removeItem('bb_should_lock'); lockScreen(); } } });
     }
 
-    async function lockScreen(){
-      const dlg=$("#lockDlg"); const input=$("#pinEntry");
+    // Lock with chill-down & destructive delete after repeated failures
+    const CHILLS = [15, 60, 300]; // seconds
+    async function lockScreen(first=false){
+      const dlg=$("#lockDlg"); const input=$("#pinEntry"); const info=$("#lockInfo");
       dlg.showModal(); await sleep(30); input.focus();
+
+      function getState(){
+        return {
+          attempts: Number(localStorage.getItem('bb_fail_attempts')||'0'),
+          chills: Number(localStorage.getItem('bb_chill_count')||'0'),
+          coolUntil: Number(localStorage.getItem('bb_cool_until')||'0'),
+          postChillAttempts: Number(localStorage.getItem('bb_post_chill_attempts')||'0')
+        };
+      }
+      function setState(obj){
+        for(const [k,v] of Object.entries(obj)){
+          if(k==='attempts') localStorage.setItem('bb_fail_attempts', String(v));
+          if(k==='chills') localStorage.setItem('bb_chill_count', String(v));
+          if(k==='coolUntil') localStorage.setItem('bb_cool_until', String(v));
+          if(k==='postChillAttempts') localStorage.setItem('bb_post_chill_attempts', String(v));
+        }
+      }
+      function resetAll(){ setState({attempts:0, chills:0, coolUntil:0, postChillAttempts:0}); }
+
+      async function maybeWipe(){
+        // wipe data and local storage keys
+        state.transactions=[]; state.budgets={}; state.recurring=[]; state.trash=[]; state.nextId=1;
+        await persist(); render(); resetAll(); toast('All data wiped due to repeated failed passcode attempts','bad');
+      }
+
+      async function checkCooldown(){
+        const st=getState();
+        const now=Date.now();
+        if(st.coolUntil && now<st.coolUntil){
+          const secs=Math.ceil((st.coolUntil-now)/1000);
+          info.textContent=`Locked. Try again in ${secs}s.`;
+          $("#unlockBtn").disabled=true;
+          input.disabled=true;
+          const iv=setInterval(()=>{
+            const left=Math.ceil((st.coolUntil-Date.now())/1000);
+            if(left>0){ info.textContent=`Locked. Try again in ${left}s.`; }
+            else { clearInterval(iv); $("#unlockBtn").disabled=false; input.disabled=false; info.textContent=''; input.focus(); }
+          },500);
+          return true;
+        }
+        return false;
+      }
+
+      if(await checkCooldown()) { /* wait until cooldown ends */ }
+
       return new Promise(res=>{
-        const handler=async ()=>{ const pin=input.value.trim(); input.value=''; const hash=await sha256Hex(pin); if(hash===state.settings.passcodeHash){ dlg.close(); toast('Unlocked'); res(true); input.removeEventListener('keydown',onEnter); $("#unlockBtn").removeEventListener('click',handler); } else { toast('Wrong passcode','bad'); input.focus(); } };
+        const handler=async ()=>{
+          const pin=input.value.trim(); input.value='';
+          // cooldown still?
+          const still=await checkCooldown(); if(still) return;
+
+          const st=getState();
+          const hash=await sha256Hex(pin);
+          if(hash===state.settings.passcodeHash){
+            dlg.close(); toast('Unlocked'); resetAll(); res(true);
+            input.removeEventListener('keydown',onEnter); $("#unlockBtn").removeEventListener('click',handler); return;
+          }
+
+          // wrong
+          if(st.chills<CHILLS.length){
+            const attempts=st.attempts+1;
+            if(attempts>=3){
+              const chill=st.chills+1;
+              const secs=CHILLS[st.chills];
+              setState({attempts:0, chills:chill, coolUntil: Date.now()+secs*1000});
+              info.textContent=`Too many attempts. Cooling down for ${secs}s.`;
+              await checkCooldown();
+            } else {
+              setState({attempts});
+              info.textContent=`Wrong passcode. Attempts: ${attempts}/3 before cooldown.`;
+            }
+          } else {
+            // after 3 chills, allow 3 more attempts then wipe
+            const n=st.postChillAttempts+1;
+            if(n>=3){ dlg.close(); await maybeWipe(); res(false); }
+            else { setState({postChillAttempts:n}); info.textContent=`Wrong. Final attempts: ${n}/3 before data wipe.`; }
+          }
+          input.focus();
+        };
         const onEnter=e=>{ if(e.key==='Enter') handler(); };
         $("#unlockBtn").addEventListener('click',handler); input.addEventListener('keydown',onEnter);
       });
@@ -538,7 +822,19 @@
 
     /* ===== Events ===== */
     $("#txForm").addEventListener("submit",(e)=>{ e.preventDefault(); const type=$("#txType").value; const amount=Number($("#txAmount").value); const category=$("#txCategory").value.trim()||"General"; const date=$("#txDate").value||todayISO(); const note=$("#txNote").value.trim(); if(!amount||amount<=0){ $("#txAmount").focus(); toast("Enter a valid amount","bad"); return; } add({type,amount,category,date,note}); e.target.reset(); $("#txType").value="EXPENSE"; $("#txDate").value=todayISO(); render(); });
-    document.addEventListener("click",(e)=>{ const del=e.target.closest("[data-del]"); const edit=e.target.closest("[data-edit]"); const budDel=e.target.closest("[data-bud-del]"); const budEdit=e.target.closest("[data-bud-edit]"); if(del){ const id=Number(del.getAttribute("data-del")); if(confirm("Delete this transaction?")){ removeTx(id); render(); } } if(edit){ const id=Number(edit.getAttribute("data-edit")); const t=state.transactions.find(x=>x.id===id); if(!t) return; $("#editId").value=String(t.id); $("#editType").value=t.type; $("#editAmount").value=String(t.amount); $("#editCategory").value=t.category; $("#editDate").value=t.date; $("#editNote").value=t.note||""; $("#editDlg").showModal(); } if(budDel){ const cat=decodeURIComponent(budDel.getAttribute("data-bud-del")); if(confirm(`Delete budget for "${cat}"?`)){ deleteBudget(cat); render(); } } if(budEdit){ const cat=decodeURIComponent(budEdit.getAttribute("data-bud-edit")); const newLimit=prompt(`Set monthly limit for "${cat}"`, String(state.budgets[cat]||0)); if(newLimit!=null){ setBudget(cat, Number(newLimit)||0); render(); } } });
+    document.addEventListener("click",(e)=>{
+      const del=e.target.closest("[data-del]"); const edit=e.target.closest("[data-edit]"); const budDel=e.target.closest("[data-bud-del]"); const budEdit=e.target.closest("[data-bud-edit]");
+      const recDel=e.target.closest("[data-rec-del]"); const recEdit=e.target.closest("[data-rec-edit]");
+      const restore=e.target.closest("[data-restore]");
+      if(del){ const id=Number(del.getAttribute("data-del")); if(confirm("Delete this transaction?")){ removeTx(id); render(); } }
+      if(edit){ const id=Number(edit.getAttribute("data-edit")); const t=state.transactions.find(x=>x.id===id); if(!t) return; $("#editId").value=String(t.id); $("#editType").value=t.type; $("#editAmount").value=String(t.amount); $("#editCategory").value=t.category; $("#editDate").value=t.date; $("#editNote").value=t.note||""; $("#editDlg").showModal(); }
+      if(budDel){ const cat=decodeURIComponent(budDel.getAttribute("data-bud-del")); if(confirm(`Delete budget for "${cat}"?`)){ pushUndo(); delete state.budgets[cat]; persist(); render(); toast('Budget removed','good'); } }
+      if(budEdit){ const cat=decodeURIComponent(budEdit.getAttribute("data-bud-edit")); const newLimit=prompt(`Set monthly limit for "${cat}"`, String(state.budgets[cat]||0)); if(newLimit!=null){ pushUndo(); state.budgets[String(cat)]=Math.max(0,Number(newLimit)||0); persist(); render(); toast('Budget saved','good'); } }
+
+      if(recDel){ const id=Number(recDel.getAttribute("data-rec-del")); pushUndo(); state.recurring=state.recurring.filter(r=>r.id!==id); persist(); render(); }
+      if(recEdit){ const id=Number(recEdit.getAttribute("data-rec-edit")); const r=state.recurring.find(x=>x.id===id); if(!r) return; const amt=prompt("Amount", String(r.amount)); if(amt==null) return; pushUndo(); r.amount=Number(amt)||0; persist(); render(); }
+      if(restore){ const id=Number(restore.getAttribute("data-restore")); const idx=state.trash.findIndex(t=>t.id===id); if(idx>=0){ pushUndo(); const t=state.trash.splice(idx,1)[0]; state.transactions.push(t); persist(); render(); toast('Restored from Trash'); } }
+    });
     $("#editCancel").addEventListener("click",()=>$("#editDlg").close());
     $("#editSave").addEventListener("click",()=>{ const id=Number($("#editId").value); updateTx(id,{ type:$("#editType").value, amount:Number($("#editAmount").value), category:$("#editCategory").value.trim(), date:$("#editDate").value, note:$("#editNote").value.trim() }); $("#editDlg").close(); render(); });
     $("#editDelete").addEventListener("click",()=>{ const id=Number($("#editId").value); if(confirm("Delete this transaction?")){ removeTx(id); $("#editDlg").close(); render(); } });
@@ -547,14 +843,27 @@
     $("#categoryFilter").addEventListener("input",render);
     $("#month").addEventListener("change",render);
 
-    $("#budForm").addEventListener("submit",(e)=>{ e.preventDefault(); const cat=$("#budCat").value.trim(); const limit=Number($("#budLimit").value); if(!cat){ $("#budCat").focus(); toast("Category required","bad"); return; } setBudget(cat,limit); e.target.reset(); render(); });
+    $("#budForm").addEventListener("submit",(e)=>{ e.preventDefault(); const cat=$("#budCat").value.trim(); const limit=Number($("#budLimit").value); if(!cat){ $("#budCat").focus(); toast("Category required","bad"); return; } pushUndo(); state.budgets[String(cat)]=Math.max(0,Number(limit)||0); persist(); e.target.reset(); render(); toast('Budget saved','good'); });
 
     $("#exportCsv").addEventListener("click",()=>{ downloadFile("transactions.csv", toCSV(state.transactions), "text/csv;charset=utf-8"); toast("CSV exported"); });
     $("#exportJson").addEventListener("click",()=>{ downloadFile("budgetbuddy.json", JSON.stringify(state,null,2), "application/json"); toast("JSON exported"); });
 
-    $("#importFile").addEventListener("change", async (e)=>{ const file=e.target.files?.[0]; if(!file) return; const text=await file.text(); try{ if(file.name.toLowerCase().endsWith(".json") || text.trim().startsWith("{")){ const obj=JSON.parse(text); if(!Array.isArray(obj.transactions)||typeof obj.budgets!=="object") throw new Error("Invalid JSON"); state.transactions=obj.transactions.map(t=>({ id:Number(t.id), date:toISO(t.date), amount:Math.abs(Number(t.amount)||0), type:(String(t.type).toUpperCase()==="INCOME"?"INCOME":"EXPENSE"), category:String(t.category||"General"), note:String(t.note||"") })); state.budgets=obj.budgets||{}; if(obj.settings&&obj.settings.currency) state.settings.currency=obj.settings.currency; if(obj.settings&&typeof obj.settings.autoLock==='boolean') state.settings.autoLock=obj.settings.autoLock; state.nextId=Number.isFinite(obj.nextId)?obj.nextId:(maxId()+1); } else { const imported=parseCSV(text); for(const r of imported){ state.transactions.push(r); state.nextId=Math.max(state.nextId,r.id+1); } } await persist(); toast("Import complete"); e.target.value=""; render(); }catch(err){ toast("Import failed: "+err.message,'bad'); } });
+    $("#importFile").addEventListener("change", async (e)=>{ const file=e.target.files?.[0]; if(!file) return; const text=await file.text(); try{
+      pushUndo();
+      if(file.name.toLowerCase().endsWith(".json") || text.trim().startsWith("{")){
+        const obj=JSON.parse(text);
+        state.transactions=(obj.transactions||[]).map(t=>({ id:Number(t.id), date:toISO(t.date), amount:Math.abs(Number(t.amount)||0), type:(String(t.type).toUpperCase()==="INCOME"?"INCOME":"EXPENSE"), category:String(t.category||"General"), note:String(t.note||"") }));
+        state.budgets=obj.budgets||{}; if(obj.settings&&obj.settings.currency) state.settings.currency=obj.settings.currency;
+        if(obj.settings&&typeof obj.settings.autoLock==='boolean') state.settings.autoLock=obj.settings.autoLock;
+        state.recurring=obj.recurring||state.recurring;
+        state.nextId=Number.isFinite(obj.nextId)?obj.nextId:(maxId()+1);
+      } else {
+        const imported=parseCSV(text); for(const r of imported){ state.transactions.push(r); state.nextId=Math.max(state.nextId,r.id+1); }
+      }
+      await persist(); toast("Import complete"); e.target.value=""; render();
+    }catch(err){ toast("Import failed: "+err.message,'bad'); } });
 
-    $("#clearAll").addEventListener("click", async ()=>{ if(confirm('Type "YES" to wipe everything.')){ const sure=prompt('Confirm by typing YES'); if(sure==="YES"){ state.transactions=[]; state.budgets={}; state.nextId=1; await persist(); render(); toast("All data cleared",'bad'); } } });
+    $("#clearAll").addEventListener("click", async ()=>{ if(confirm('Type "YES" to wipe everything."')){ const sure=prompt('Confirm by typing YES'); if(sure==="YES"){ state.transactions=[]; state.budgets={}; state.recurring=[]; state.trash=[]; state.nextId=1; await persist(); render(); toast("All data cleared",'bad'); } } });
 
     $("#changeStorage").addEventListener("click",()=>$("#storageDlg").showModal());
     $("#pickBrowser").addEventListener("click", async ()=>{ storageMode='local'; await idb.set(MODE_KEY,storageMode); await idb.del('dataHandle'); fileHandle=null; lsSync(); $("#storageDlg").close(); renderStorageBadge(); toast("Using Browser Storage"); });
@@ -566,6 +875,16 @@
     $("#savePin").addEventListener("click", async ()=>{ const a=$("#newPin").value.trim(); const b=$("#confirmPin").value.trim(); if(!/^\d{4,8}$/.test(a)){ toast('Passcode must be 4–8 digits','bad'); return; } if(a!==b){ toast('Passcodes do not match','bad'); return; } state.settings.passcodeHash=await sha256Hex(a); $("#newPin").value=$("#confirmPin").value=''; await persist(); toast('Passcode set'); });
     $("#clearPin").addEventListener("click", async ()=>{ state.settings.passcodeHash=null; await persist(); toast('Passcode removed'); });
     $("#lockNow").addEventListener("click", async ()=>{ if(!state.settings.passcodeHash){ toast('No passcode set (Settings)','bad'); return; } await lockScreen(); });
+
+    // Recurring dialog handlers
+    $("#openRecurring").addEventListener("click",()=>{ $("#recStart").value=todayISO(); $("#recurringDlg").showModal(); renderRecurringTable(); });
+    $("#closeRecurring").addEventListener("click",()=>$("#recurringDlg").close());
+    $("#recForm").addEventListener("submit",(e)=>{ e.preventDefault(); const r={ id: Date.now(), type:$("#recType").value, amount:Math.abs(Number($("#recAmount").value)||0), category:$("#recCategory").value.trim()||'General', note:$("#recNote").value.trim(), freq:$("#recFreq").value, nextDate: $("#recStart").value || todayISO() }; if(!r.amount){ toast('Amount required','bad'); return; } pushUndo(); state.recurring.push(r); persist(); render(); toast('Recurring added'); });
+
+    // Trash dialog
+    $("#openTrash").addEventListener("click",()=>{ renderTrash(); $("#trashDlg").showModal(); });
+    $("#closeTrash").addEventListener("click",()=>$("#trashDlg").close());
+    $("#purgeTrash").addEventListener("click",()=>{ if(confirm('Permanently delete all items in Trash?')){ pushUndo(); state.trash=[]; persist(); renderTrash(); toast('Trash purged','bad'); } });
 
     if('serviceWorker' in navigator){ window.addEventListener('load', ()=>{ navigator.serviceWorker.register('./service-worker.js').catch(()=>{}); }); }
     init();
