@@ -194,3 +194,16 @@ input, select, textarea {
 
 /* Allow cards/tables to shrink inside grid */
 .card, .table-wrap { min-width: 0; }
+
+
+/* Unfreeze the app header */
+header {
+  position: static !important;
+  top: auto !important;
+}
+
+/* If you also don’t want table headers stuck: */
+table th {
+  position: static !important;
+  top: auto !important;
+}
