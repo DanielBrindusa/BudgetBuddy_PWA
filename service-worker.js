@@ -1,5 +1,5 @@
 // BudgetBuddy PWA offline cache
-const CACHE_VERSION = 'v7'; // bumped for styles.css + tooltips.js
+const CACHE_VERSION = 'v8'; // bumped for styles.css + tooltips.js
 const CACHE_NAME = `budgetbuddy-${CACHE_VERSION}`;
 
 const ASSETS = [

@@ -177,3 +177,20 @@ table th{
 }
 .bb-tooltip-show { opacity: 1; transform: translateY(0); }
 .bb-tooltip-leave { opacity: 0 !important; transform: translateY(-2px) !important; }
+
+/* Stop forms from overflowing horizontally on mobile */
+.row > * {
+  flex: 1 1 160px;   /* allow grow, shrink, and wrap */
+  min-width: 0;      /* crucial: allow shrinking inside flex rows */
+}
+
+/* Prevent inputs from overflowing their container */
+input, select, textarea {
+  max-width: 100%;
+}
+
+/* Prevent table content from forcing overflow */
+.nowrap { white-space: nowrap; }
+
+/* Allow cards/tables to shrink inside grid */
+.card, .table-wrap { min-width: 0; }
