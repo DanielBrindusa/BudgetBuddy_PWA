@@ -1,12 +1,10 @@
 // BudgetBuddy PWA offline cache
-const CACHE_VERSION = 'v8'; // bumped for styles.css + tooltips.js
+const CACHE_VERSION = 'v6'; // bumped so clients fetch the updated HTML
 const CACHE_NAME = `budgetbuddy-${CACHE_VERSION}`;
 
 const ASSETS = [
   './',
   './budgetbuddy.html',
-  './styles.css',
-  './tooltips.js',
   './manifest.webmanifest'
   // Add icons here if you create them:
   // './icon-192.png',

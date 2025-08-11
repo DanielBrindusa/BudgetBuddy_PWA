@@ -150,58 +150,17 @@
     .sr-only{ position:absolute; left:-10000px; top:auto; width:1px; height:1px; overflow:hidden }
     footer{ color:var(--muted); padding:0 16px 26px; margin-top:16px }
 
+    /* --- Unfreeze the app header (Solution #2) --- */
+    header{
+      position: static !important;  /* was: sticky */
+      top: auto !important;
+    }
 
-
-	/* --- Unfreeze the app header --- */
-	header{
-	  position: static !important;  /* was: sticky */
-	  top: auto !important;
-	}
-
-	/* --- Unfreeze table header row inside the transactions/budgets tables --- */
-	table th{
-	  position: static !important;  /* was: sticky */
-	  top: auto !important;
-	}
-
-
-
-
-
-
-/* ===== Custom Tooltips ===== */
-.bb-tooltip {
-  position: absolute;
-  z-index: 99999;
-  max-width: 260px;
-  padding: 8px 12px;
-  background: var(--surface);
-  color: var(--text);
-  font-size: 0.85rem;
-  line-height: 1.3;
-  border: 1px solid var(--outline);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow);
-  opacity: 0;
-  transform: translateY(-4px);
-  pointer-events: none;
-  transition: opacity 0.15s ease, transform 0.15s ease;
-}
-
-.bb-tooltip-show {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.bb-tooltip-leave {
-  opacity: 0;
-  transform: translateY(-4px);
-}
-
-
-
-
-
+    /* --- Unfreeze the table header row (Solution #2) --- */
+    table th{
+      position: static !important;  /* was: sticky */
+      top: auto !important;
+    }
   </style>
 </head>
 <body>
@@ -226,10 +185,10 @@
           <input id="importFile" type="file" accept=".csv,.json,text/csv,application/json" class="sr-only" />
           <button id="clearAll" class="btn danger">Reset</button>
         </div>
-	<div class="actionsRedo">
-            <button id="undoBtn" class="btn" title="Undo (Ctrl+Z)">Undo</button>
-            <button id="redoBtn" class="btn" title="Redo (Ctrl+Y)">Redo</button>
-          </div>
+        <div class="actionsRedo">
+          <button id="undoBtn" class="btn" title="Undo (Ctrl+Z)">Undo</button>
+          <button id="redoBtn" class="btn" title="Redo (Ctrl+Y)">Redo</button>
+        </div>
       </div>
 
       <div class="filters">
@@ -246,7 +205,7 @@
           <input id="categoryFilter" type="text" list="cats" placeholder="All" />
           <datalist id="cats"></datalist>
         </div>
-	<br><br>
+        <br><br>
         <div class="row-center">
           <span class="chip">Currency: <strong id="currLabel" style="margin-left:6px">USD</strong></span>
           <button id="lockNow" class="btn">Lock now</button>
@@ -811,7 +770,8 @@
 
       async function maybeWipe(){
         // wipe data and local storage keys
-        state.transactions=[]; state.budgets={}; state.recurring=[]; state.trash=[]; state.nextId=1;
+        state.transactions=[]; state.budgets={}; state.recurring=[]; state.trash=[];
+        state.nextId=1;
         await persist(); render(); resetAll(); toast('All data wiped due to repeated failed passcode attempts','bad');
       }
 
@@ -944,6 +904,5 @@
     init();
   })();
   </script>
-  <script src="tooltips.js"></script>
 </body>
 </html>
