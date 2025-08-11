@@ -928,7 +928,23 @@
     $("#saveCurrency").addEventListener("click", async ()=>{ const sel=$("#currencySelect").value; const custom=$("#customCurr").value.trim().toUpperCase(); state.settings.currency=custom||sel||'USD'; state.settings.autoLock=!!$("#autoLockToggle").checked; await persist(); $("#currLabel").textContent=state.settings.currency; $("#settingsDlg").close(); render(); toast('Settings saved'); });
     $("#closeSettings").addEventListener("click",()=>$("#settingsDlg").close());
     $("#savePin").addEventListener("click", async ()=>{ const a=$("#newPin").value.trim(); const b=$("#confirmPin").value.trim(); if(!/^\d{4,8}$/.test(a)){ toast('Passcode must be 4–8 digits','bad'); return; } if(a!==b){ toast('Passcodes do not match','bad'); return; } state.settings.passcodeHash=await sha256Hex(a); $("#newPin").value=$("#confirmPin").value=''; await persist(); toast('Passcode set'); });
-    $("#clearPin").addEventListener("click", async ()=>{ state.settings.passcodeHash=null; await persist(); toast('Passcode removed'); });
+	$("#clearPin").addEventListener("click", async () => {
+	  if (!state.settings.passcodeHash) {
+	    toast('No passcode is set', 'bad');
+	    return;
+	  }
+	  if (!confirm("Are you sure you want to remove your passcode?")) return;
+
+	  state.settings.passcodeHash = null;
+	  await persist();
+
+	  // Clear input fields
+	  $("#newPin").value = "";
+	  $("#confirmPin").value = "";
+
+	  toast('Passcode removed', 'good');
+	});
+
     $("#lockNow").addEventListener("click", async ()=>{ if(!state.settings.passcodeHash){ toast('No passcode set (Settings)','bad'); return; } await lockScreen(); });
 
     // Recurring dialog handlers
